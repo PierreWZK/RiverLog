@@ -18,7 +18,11 @@ Le cœur du projet n'est pas le CRUD, mais **des statistiques fiables** : cartes
 - **Import Betclic** : fichiers `.txt` ou `.zip`, doublons ignorés, réimport sans risque. Les tournois proches sont regroupés en **sessions automatiques**.
 - **Tournois** : ROI, victoires, places finales, conversion en heads-up, résultats par multiplicateur et par buy-in, ROI hors jackpots.
 - **Détail d'un tournoi** : chaque main avec cartes, board, tapis en big blinds et jetons gagnés ou perdus.
-- **Qualité** : 70 tests automatisés sur MySQL, CI/CD GitHub Actions (tests puis déploiement automatique sur Alwaysdata).
+- **Défis du jour** (`/defis`), les mêmes pour tout le monde, renouvelés à minuit :
+  - *Qui est devant ?* : estimer l'équité de deux mains à tapis (évaluateur de mains et calcul d'équité maison) ;
+  - *Le calcul du jour* : cotes du pot, outs, ROI, taux horaire, bankroll, avec l'explication de chaque réponse ;
+  - *Défi discipline* : un objectif de bankroll par jour (stop-loss, pause, jour de repos…), vérifié sur les vraies sessions du compte, avec une série de jours réussis.
+- **Qualité** : 92 tests automatisés sur MySQL, CI/CD GitHub Actions (tests puis déploiement automatique sur Alwaysdata).
 
 ## Lancer en local
 
@@ -48,12 +52,88 @@ Puis ouvrir http://127.0.0.1:8000 (la démo publique est sur `/demo`).
 
 **Tests** : `php artisan test`. Ils utilisent la base `riverlog_test`, vidée à chaque test : la base de l'application n'est jamais touchée.
 
-## Hébergement
+## Mise en ligne
 
-RiverLog est hébergé sur **[Alwaysdata](https://www.alwaysdata.com)** (PHP 8.4, MySQL) : **https://riverlog.alwaysdata.net**.
+RiverLog est hébergé sur **[Alwaysdata](https://www.alwaysdata.com)** : **https://riverlog.alwaysdata.net**.
 
-Chaque push sur `master` lance le workflow [CI / CD](.github/workflows/main.yml) : les tests tournent sur PHP 8.3 + MySQL 8.4, puis, s'ils passent, le serveur est mis à jour en SSH par [deploy.sh](deploy.sh) (code, dépendances, migrations, caches). Les secrets (clé SSH, empreinte du serveur) sont stockés dans GitHub, jamais dans le dépôt.
+```
+ push sur master ──► GitHub Actions ──► tests (PHP 8.3 + MySQL 8.4)
+                                          │ s'ils passent
+                                          ▼
+                     connexion SSH ──► Alwaysdata : deploy.sh ──► site à jour
+```
+
+### 1. Le site et la base de données sur Alwaysdata
+
+Tout se configure dans l'administration d'Alwaysdata (compte `riverlog`) :
+
+| Élément | Réglage |
+| --- | --- |
+| **PHP** | Version 8.4 (*Environnement*), Laravel 13 demande au moins PHP 8.3 |
+| **Base de données** | Base MySQL (MariaDB) créée dans *Bases de données → MySQL*, avec un utilisateur dédié ; hôte `mysql-riverlog.alwaysdata.net` |
+| **Site** | *Web → Sites* : type PHP, adresse `riverlog.alwaysdata.net`, **répertoire racine `/www/riverlog/public`** (jamais la racine du projet, sinon le `.env` serait lisible depuis le web) |
+| **HTTPS** | Certificat Let's Encrypt généré et renouvelé automatiquement par Alwaysdata ; Laravel fait confiance à son proxy (`trustProxies` dans `bootstrap/app.php`) pour que les liens restent en `https://` |
+| **SSH** | Activé dans *Accès distant → SSH* : `ssh riverlog@ssh-riverlog.alwaysdata.net` |
+
+### 2. Installation du site en SSH (une seule fois)
+
+```bash
+ssh riverlog@ssh-riverlog.alwaysdata.net
+
+cd ~/www
+git clone https://github.com/PierreWZK/RiverLog.git riverlog
+cd riverlog
+composer install --no-dev --optimize-autoloader
+cp .env.example .env
+php artisan key:generate
+nano .env                          # valeurs de production, voir ci-dessous
+php artisan migrate --force --seed # tables + compte de démonstration
+php artisan optimize               # caches de configuration, routes et vues
+```
+
+Le `.env` du serveur n'est jamais versionné :
+
+```
+APP_ENV=production
+APP_DEBUG=false                    # indispensable : sinon une erreur afficherait les mots de passe
+APP_URL=https://riverlog.alwaysdata.net
+DB_CONNECTION=mysql
+DB_HOST=mysql-riverlog.alwaysdata.net
+DB_DATABASE=riverlog_…
+DB_USERNAME=…
+DB_PASSWORD=…
+SESSION_SECURE_COOKIE=true
+```
+
+`--force` est obligatoire en production : Laravel refuse sinon de lancer migrations et seeders, par sécurité.
+
+### 3. Déploiement continu avec GitHub Actions
+
+Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) a deux étapes :
+
+1. **Tests** (à chaque push et pull request) : PHP 8.3 et une base MySQL 8.4 temporaire sont installés sur GitHub, puis tous les tests sont lancés.
+2. **Déploiement** (uniquement sur `master`, et seulement si les tests passent) : GitHub se connecte en SSH à Alwaysdata et exécute [`deploy.sh`](deploy.sh), qui :
+   - affiche une page de maintenance pendant la mise à jour (retirée même en cas d'échec) ;
+   - récupère le dernier code de `master` ;
+   - installe les dépendances sans les outils de développement (`composer install --no-dev`) ;
+   - applique les migrations (`php artisan migrate --force`) et reconstruit les caches.
+
+   Un dernier contrôle vérifie que la page d'accueil répond. Le `.env` et le dossier `storage/` du serveur ne sont jamais touchés.
+
+Le bouton **Actions → CI / CD → Run workflow** permet aussi de redéployer à la main.
+
+**Connexion SSH sécurisée** : une clé SSH dédiée au déploiement a été créée. Sa partie publique est ajoutée à `~/.ssh/authorized_keys` sur Alwaysdata ; sa partie privée n'existe que dans les secrets GitHub. Le workflow vérifie aussi l'empreinte du serveur, pour ne jamais se connecter à un faux serveur.
+
+| Réglage du dépôt (*Settings → Secrets and variables → Actions*) | Valeur |
+| --- | --- |
+| Secret `SSH_PRIVATE_KEY` | Clé privée de déploiement |
+| Secret `SSH_KNOWN_HOSTS` | Empreinte du serveur (`ssh-keyscan ssh-riverlog.alwaysdata.net`) |
+| Variable `DEPLOY_HOST` | `ssh-riverlog.alwaysdata.net` |
+| Variable `DEPLOY_USER` | `riverlog` |
+| Variable `DEPLOY_PATH` | `www/riverlog` |
+
+Pour révoquer l'accès de GitHub au serveur, il suffit de supprimer la ligne de la clé dans `~/.ssh/authorized_keys`.
 
 ## Technologies
 
-Laravel 13, Blade, MySQL 8.4, Chart.js. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).
+Laravel 13, Blade, MySQL 8.4, Chart.js. Hébergement Alwaysdata, CI/CD GitHub Actions. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).

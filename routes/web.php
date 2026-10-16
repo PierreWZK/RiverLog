@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\ChallengeController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HandImportController;
 use App\Http\Controllers\LandingController;
@@ -16,6 +17,13 @@ Route::get('/', LandingController::class)->name('landing');
 Route::get('/demo', [DashboardController::class, 'demo'])->name('demo');
 Route::get('/demo/tournaments', [TournamentController::class, 'demoIndex'])->name('demo.tournaments.index');
 Route::get('/demo/tournaments/{tournament}', [TournamentController::class, 'demoShow'])->name('demo.tournaments.show');
+
+// Défis quotidiens : les deux quiz sont ouverts à tous, le défi discipline demande un compte
+Route::get('/defis', [ChallengeController::class, 'index'])->name('challenges.index');
+Route::get('/defis/discipline', [ChallengeController::class, 'discipline'])->middleware('auth')->name('challenges.discipline');
+Route::get('/defis/{challenge}', [ChallengeController::class, 'show'])->whereIn('challenge', ['qui-est-devant', 'calcul'])->name('challenges.show');
+Route::post('/defis/{challenge}', [ChallengeController::class, 'submit'])->whereIn('challenge', ['qui-est-devant', 'calcul'])
+    ->middleware('throttle:20,1')->name('challenges.submit');
 
 // Comptes : inscription et connexion, réservées aux visiteurs non connectés
 Route::middleware('guest')->group(function () {

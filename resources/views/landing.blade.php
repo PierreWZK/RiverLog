@@ -25,6 +25,7 @@
             RiverLog
         </a>
         <nav class="nav-actions">
+            <a href="{{ route('challenges.index') }}" class="nav-link">Défis du jour</a>
             <a href="{{ $repo }}" class="nav-link nav-github" target="_blank" rel="noopener">GitHub ↗</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="nav-link">Mon dashboard</a>
@@ -37,7 +38,7 @@
     <main>
         {{-- Hero --}}
         <section class="hero container">
-            <p class="badge"><span class="badge-dot"></span> Gratuit · Import Betclic · Jour 3/30</p>
+            <p class="badge"><span class="badge-dot"></span> Gratuit · Import Betclic</p>
             <h1>Vos sessions de poker, <span>enfin en chiffres.</span></h1>
             <p class="lead">
                 RiverLog suit votre bankroll et analyse vos tournois : profit net, taux horaire,
@@ -146,6 +147,30 @@
                     <h3>Un compte, des données privées</h3>
                     <p>Chacun ne voit que ses propres sessions, tournois et mains. Vos fichiers importés restent privés.</p>
                 </article>
+            </div>
+        </section>
+
+        {{-- Défis du jour --}}
+        <section class="section container">
+            <h2>Un défi par jour</h2>
+            <p class="section-lead">Les mêmes défis pour tout le monde, renouvelés chaque jour à minuit. Gardez votre série de jours avec un compte.</p>
+
+            <div class="features">
+                <a href="{{ route('challenges.show', 'qui-est-devant') }}" class="feature feature-link">
+                    <span class="feature-icon chip-red">♠</span>
+                    <h3>Qui est devant ?</h3>
+                    <p>Deux mains à tapis, du préflop au turn : estimez la chance de gagner de chacune. 5 situations, score sur 100.</p>
+                </a>
+                <a href="{{ route('challenges.show', 'calcul') }}" class="feature feature-link">
+                    <span class="feature-icon chip-gold">♦</span>
+                    <h3>Le calcul du jour</h3>
+                    <p>Cotes du pot, outs, ROI, taux horaire, bankroll : 5 calculs à choix multiples, avec l'explication de chaque réponse.</p>
+                </a>
+                <a href="{{ route('challenges.index') }}" class="feature feature-link">
+                    <span class="feature-icon chip-green">♥</span>
+                    <h3>Défi discipline</h3>
+                    <p>Un objectif de gestion de bankroll par jour (stop-loss, pause, jour de repos…), vérifié sur vos vraies sessions.</p>
+                </a>
             </div>
         </section>
 

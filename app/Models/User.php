@@ -43,6 +43,12 @@ class User extends Authenticatable
         return $this->hasMany(HandImport::class);
     }
 
+    /** @return HasMany<ChallengeResult, $this> */
+    public function challengeResults(): HasMany
+    {
+        return $this->hasMany(ChallengeResult::class);
+    }
+
     /** @return HasMany<Hand, $this> */
     public function hands(): HasMany
     {

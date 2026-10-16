@@ -507,3 +507,14 @@ a {
     display: none;
   }
 }
+
+/* Cartes cliquables (défis du jour) */
+.feature-link {
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.feature-link:hover {
+  border-color: var(--felt);
+  transform: translateY(-2px);
+}

@@ -490,3 +490,55 @@ L'import est d'abord synchrone (les fichiers sont petits). Il passera dans une f
 - Répartition officielle des multiplicateurs annoncée par Betclic, pour comparer la chance réelle à l'attendu.
 - Les heures sont-elles toujours en UTC, quel que soit le réglage du compte ?
 - Format des exports des autres sites visés (Winamax, PokerStars).
+
+---
+
+## 9. Défis du jour
+
+> **Statut : développé.** Page `/defis`, onglet « Défis » pour les comptes connectés.
+
+### 9.1 Principes
+
+- **Le même défi pour tout le monde** un jour donné : les questions sont tirées avec un générateur initialisé par la date (`crc32("riverlog:{défi}:{AAAA-MM-JJ}")`), renouvelées à minuit (heure de Paris).
+- **Une seule tentative par jour.** Correction **côté serveur** : la page ne contient jamais les réponses avant validation.
+- **Avec un compte**, chaque résultat est enregistré (table `challenge_results`, unique par compte, défi et jour) : série de jours consécutifs et meilleur score. **Sans compte**, les deux quiz restent jouables ; le résultat est gardé dans la session du navigateur le temps de la journée.
+- Une réponse envoyée avec la date de la veille (formulaire ouvert avant minuit) n'est pas corrigée avec le défi du jour.
+
+### 9.2 « Qui est devant ? »
+
+- 5 situations à tapis entre deux mains : 2 préflop, 2 au flop, 1 au turn. Le joueur estime l'équité de la main A (curseur de 0 à 100 %).
+- Équité calculée par un **évaluateur de mains maison** (`App\Poker\HandEvaluator`, meilleure main de 5 cartes parmi 7) : **exacte** au flop et au turn (tous les boards restants), **par échantillon de 30 000 boards** préflop, avec un générateur reproductible.
+- Les situations trop évidentes (favori à plus de 90 %) ou pur pile-ou-face (moins de 55 %) sont écartées. Le défi du jour est mis en cache.
+- **Score** : 20 points par question, moins 1 point par point d'écart avec l'équité réelle. L'évaluateur servira aussi à l'EV all-in de la phase 4.
+
+### 9.3 « Le calcul du jour »
+
+5 questions à choix multiples, tirées parmi 6 modèles aux valeurs aléatoires, chacune avec l'explication du calcul :
+
+| Modèle | Calcul attendu |
+| --- | --- |
+| Cotes du pot | `mise ÷ (pot + 2 × mise)` |
+| Outs au flop | `1 − (47 − outs)/47 × (46 − outs)/46` (et la règle du 4) |
+| Payer ou se coucher (turn) | comparer `outs ÷ 46` aux cotes du pot |
+| ROI | `(gains − buy-ins) ÷ buy-ins` |
+| Taux horaire | `résultat ÷ heures` (piège : 2 h 30 = 2,5 h, pas 2,3 h) |
+| Gestion de bankroll | plus gros buy-in ≤ `bankroll ÷ nombre de buy-ins` |
+
+Les mauvaises réponses proposées sont des erreurs classiques (diviser par le pot au lieu du pot final, règle du 2 au lieu du 4…). **Score** : 20 points par bonne réponse.
+
+### 9.4 Défi discipline (comptes connectés)
+
+Un objectif de gestion de bankroll par jour, sur un cycle de 7 jours, vérifié sur les sessions et tournois du compte. Rien n'est stocké : tout se recalcule.
+
+| Objectif | Règle |
+| --- | --- |
+| Session maîtrisée | 2 h de jeu maximum dans la journée |
+| Bilan écrit | une note sur au moins une session saisie à la main |
+| Pause obligatoire | au moins 15 min entre deux sessions |
+| Stop-loss | pas de session après 2 sessions perdantes d'affilée |
+| Volume maîtrisé | 15 tournois ou sessions maximum |
+| Jour de repos | aucune session (un jour par semaine) |
+
+- Statuts : **réussi**, **manqué**, **en cours** (aujourd'hui), **pas joué** (neutre : ne casse pas la série).
+- Un jour de repos n'est réussi que pour un joueur **actif** (au moins une session les 6 jours précédents), et les jours antérieurs à la création du compte ne comptent pas.
+- **Série** : jours réussis consécutifs ; un objectif manqué la remet à zéro. Historique des 14 derniers jours.

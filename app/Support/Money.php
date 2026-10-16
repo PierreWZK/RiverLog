@@ -30,7 +30,7 @@ final class Money
     }
 
     /** Pourcentage : « +180,0 % » (signé, pour un ROI) ou « 40,0 % », « — » si non calculable. */
-    public static function percent(?float $value, bool $signed = false): string
+    public static function percent(?float $value, bool $signed = false, int $decimals = 1): string
     {
         if ($value === null) {
             return '—';
@@ -42,7 +42,7 @@ final class Money
             default => '',
         };
 
-        return $sign.number_format(abs($value), 1, ',', self::NBSP).self::NBSP.'%';
+        return $sign.number_format(abs($value), $decimals, ',', self::NBSP).self::NBSP.'%';
     }
 
     /** Durée : 165 → « 2 h 45 », 60 → « 1 h », 45 → « 45 min ». */
