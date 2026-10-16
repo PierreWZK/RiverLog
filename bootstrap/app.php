@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // En production, Alwaysdata place un proxy (« alproxy ») devant le site : on lui fait confiance
+        // pour que Laravel sache que la requête d'origine était en HTTPS (liens et formulaires en https://)
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
