@@ -1,6 +1,5 @@
 @php
     $repo = 'https://github.com/PierreWZK/RiverLog';
-    $spec = 'https://github.com/PierreWZK/RiverLog/blob/master/CAHIER_DES_CHARGES.md';
 
     // Formats d'affichage (français) : +342,50 € · 8,56 €/h
     $money = fn (float $v) => ($v > 0 ? '+' : ($v < 0 ? '−' : '')).number_format(abs($v), 2, ',', ' ').' €';
@@ -12,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RiverLog · Suivi de bankroll poker</title>
-    <meta name="description" content="RiverLog suit vos sessions de poker : profit net, taux horaire, courbe de résultats et filtres par format et période.">
+    <meta name="description" content="RiverLog suit votre bankroll poker : sessions, profit net, taux horaire, import des historiques Betclic, ROI et statistiques de tournois.">
     <link rel="icon" href="{{ asset('riverlog.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,12 +37,11 @@
     <main>
         {{-- Hero --}}
         <section class="hero container">
-            <p class="badge"><span class="badge-dot"></span> En développement · Jour 3/30</p>
+            <p class="badge"><span class="badge-dot"></span> Gratuit · Import Betclic · Jour 3/30</p>
             <h1>Vos sessions de poker, <span>enfin en chiffres.</span></h1>
             <p class="lead">
-                RiverLog enregistre chaque session et calcule ce qui compte vraiment :
-                votre profit net, votre taux horaire et l'évolution de vos résultats,
-                format par format.
+                RiverLog suit votre bankroll et analyse vos tournois : profit net, taux horaire,
+                ROI et évolution de vos résultats, à partir de vos sessions ou de vos historiques de mains.
             </p>
             <div class="hero-actions">
                 @auth
@@ -100,53 +98,91 @@
         </section>
 
         {{-- Fonctionnalités --}}
-        <section class="section container">
-            <h2>Ce que fera l'outil</h2>
-            <p class="section-lead">Créez votre compte : vous saisissez vos sessions, RiverLog fait les calculs. Vos données restent privées, visibles par vous seul.</p>
+        <section class="section container" id="fonctionnalites">
+            <h2>Tout ce que fait RiverLog</h2>
+            <p class="section-lead">Saisissez vos sessions à la main ou importez vos historiques de mains : RiverLog fait les calculs, vous gardez la tête au jeu.</p>
 
             <div class="features">
                 <article class="feature">
                     <span class="feature-icon chip-red">♠</span>
-                    <h3>Historique des sessions</h3>
-                    <p>Date, format, durée, résultat net et notes. Ajout, modification et suppression, de la plus récente à la plus ancienne.</p>
+                    <h3>Sessions de jeu</h3>
+                    <p>
+                        Date, format, durée, résultat et notes, en quelques secondes.
+                        <span class="pill">Cash Game</span><span class="pill">MTT</span><span class="pill">Sit &amp; Go</span><span class="pill">Spin</span>
+                    </p>
                 </article>
                 <article class="feature">
                     <span class="feature-icon chip-gold">♦</span>
-                    <h3>Statistiques claires</h3>
-                    <p>Profit net, nombre de sessions, temps joué et taux horaire, calculés côté serveur sur vos vraies données.</p>
+                    <h3>Dashboard de bankroll</h3>
+                    <p>Profit net, taux horaire, nombre de sessions et temps joué, avec la courbe de votre profit cumulé.</p>
                 </article>
                 <article class="feature">
                     <span class="feature-icon chip-blue">♣</span>
                     <h3>Filtres qui recalculent tout</h3>
-                    <p>
-                        Par format
-                        <span class="pill">Cash Game</span><span class="pill">MTT</span><span class="pill">Sit &amp; Go</span>,
-                        par période et par résultat. Les chiffres, la courbe et le tableau suivent.
-                    </p>
+                    <p>Par format, période et résultat. Les cartes, la courbe et le tableau suivent, et l'URL garde vos filtres.</p>
                 </article>
                 <article class="feature">
                     <span class="feature-icon chip-green">♥</span>
-                    <h3>Courbe de profit</h3>
-                    <p>L'évolution de votre résultat cumulé, session après session, dans l'ordre chronologique.</p>
+                    <h3>Import des historiques Betclic</h3>
+                    <p>Déposez vos exports en .txt ou .zip : tournois, résultats et sessions sont créés automatiquement, sans doublon.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-icon chip-red">♠</span>
+                    <h3>Statistiques de tournois</h3>
+                    <p>ROI, victoires, places finales, conversion en heads-up, résultats par multiplicateur et par buy-in, ROI hors jackpots.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-icon chip-gold">♦</span>
+                    <h3>Détail main par main</h3>
+                    <p>Vos cartes, le board, votre tapis en big blinds et les jetons gagnés ou perdus, avec la courbe de votre tapis.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-icon chip-blue">♣</span>
+                    <h3>Sessions automatiques</h3>
+                    <p>Les tournois joués à moins de 30 minutes d'écart forment une session, ajoutée d'office à votre dashboard.</p>
+                </article>
+                <article class="feature">
+                    <span class="feature-icon chip-green">♥</span>
+                    <h3>Un compte, des données privées</h3>
+                    <p>Chacun ne voit que ses propres sessions, tournois et mains. Vos fichiers importés restent privés.</p>
                 </article>
             </div>
+        </section>
+
+        {{-- Import en 3 étapes --}}
+        <section class="section container">
+            <h2>Vos tournois analysés en 3 étapes</h2>
+            <p class="section-lead">Plus besoin de recopier vos résultats : l'historique de mains contient déjà tout.</p>
+
+            <ol class="steps">
+                <li>
+                    <span class="step-number">1</span>
+                    <h3>Exportez</h3>
+                    <p>Téléchargez l'historique de vos mains depuis votre compte Betclic.</p>
+                </li>
+                <li>
+                    <span class="step-number">2</span>
+                    <h3>Déposez</h3>
+                    <p>Glissez le fichier .txt ou l'archive .zip sur la page Import. Réimporter un fichier ne crée jamais de doublon.</p>
+                </li>
+                <li>
+                    <span class="step-number">3</span>
+                    <h3>Analysez</h3>
+                    <p>Chaque tournoi est compté une seule fois : buy-in, multiplicateur, place finale, gain et toutes vos mains.</p>
+                </li>
+            </ol>
         </section>
 
         {{-- Les calculs --}}
         <section class="section container">
             <h2>Des calculs fiables</h2>
-            <p class="section-lead">Le cœur de l'outil. Les mêmes règles partout : cartes, courbe et tableau utilisent toujours le même ensemble de sessions.</p>
+            <p class="section-lead">Les mêmes règles partout : cartes, courbes et tableaux utilisent toujours le même ensemble de données, filtré côté serveur.</p>
 
             <div class="formulas">
                 <div class="formula">
                     <span class="formula-name">Profit net</span>
                     <code>Σ résultats</code>
-                    <p>Une session perdante de 50 € compte pour −50,00 €.</p>
-                </div>
-                <div class="formula">
-                    <span class="formula-name">Temps joué</span>
-                    <code>Σ durées ÷ 60</code>
-                    <p>Les durées sont saisies en minutes, affichées en heures.</p>
+                    <p>Calculé au centime près : une session perdante de 50 € compte pour −50,00 €.</p>
                 </div>
                 <div class="formula">
                     <span class="formula-name">Taux horaire</span>
@@ -154,40 +190,38 @@
                     <p>Affiché « — » sans heure jouée : jamais de division par zéro.</p>
                 </div>
                 <div class="formula">
-                    <span class="formula-name">Profit cumulé</span>
-                    <code>C<sub>k</sub> = Σ<sub>i≤k</sub> résultat<sub>i</sub></code>
-                    <p>Calculé dans l'ordre chronologique, pour tracer la courbe.</p>
+                    <span class="formula-name">ROI</span>
+                    <code>profit ÷ buy-ins</code>
+                    <p>Avec un avertissement tant que l'échantillon est trop petit pour être parlant.</p>
+                </div>
+                <div class="formula">
+                    <span class="formula-name">Mains contrôlées</span>
+                    <code>Σ mises = pot</code>
+                    <p>Chaque main importée est vérifiée ; une main incohérente est signalée au lieu de fausser vos chiffres.</p>
                 </div>
             </div>
         </section>
 
-        {{-- Feuille de route --}}
+        {{-- Appel final --}}
         <section class="section container">
-            <h2>Feuille de route</h2>
-            <p class="section-lead">Le projet avance en public, étape par étape. Il tourne en local pour l'instant, la mise en ligne viendra ensuite.</p>
-
-            <ol class="roadmap">
-                <li class="is-done"><span>Projet Laravel installé et cahier des charges rédigé</span></li>
-                <li class="is-done"><span>Page vitrine</span></li>
-                <li><span>Sessions : base de données, ajout, modification, suppression</span></li>
-                <li><span>Comptes personnels : chacun ses sessions, plus un dashboard de démonstration</span></li>
-                <li><span>Calculs : profit net, temps joué, taux horaire</span></li>
-                <li><span>Dashboard : cartes statistiques, tableau et courbe Chart.js</span></li>
-                <li><span>Filtres par format, période et résultat, dans l'URL</span></li>
-                <li><span>Tests, documentation et données de démonstration</span></li>
-                <li class="is-later">
-                    <span>Mise en production : l'outil en ligne, avec une vraie base de données</span>
-                    <em class="tag-later">Plus tard</em>
-                </li>
-            </ol>
-
-            <p class="bonus">Et ensuite, si le temps le permet : export CSV, objectif de bankroll, comparaison des formats, import CSV.</p>
+            <div class="cta">
+                <h2>Prêt à suivre votre bankroll ?</h2>
+                <p>Créez votre compte gratuitement, ou explorez d'abord le dashboard de démonstration.</p>
+                <div class="hero-actions">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="btn btn-primary">Ouvrir mon dashboard →</a>
+                    @else
+                        <a href="{{ route('register') }}" class="btn btn-primary">Créer mon compte →</a>
+                    @endauth
+                    <a href="{{ route('demo.tournaments.index') }}" class="btn btn-ghost">Voir les tournois de démo</a>
+                </div>
+            </div>
         </section>
     </main>
 
     <footer class="footer container">
-        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets</span>
-        <span>Laravel · Blade · Chart.js</span>
+        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets · <a href="{{ $repo }}" target="_blank" rel="noopener">Code sur GitHub</a></span>
+        <span>Laravel · Blade · MySQL · Chart.js</span>
     </footer>
 </body>
 </html>

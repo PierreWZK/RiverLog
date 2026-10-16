@@ -398,77 +398,62 @@ a {
   font-size: 0.9rem;
 }
 
-/* Feuille de route */
-.roadmap {
+/* Import en 3 étapes */
+.steps {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
   margin: 30px 0 0;
   padding: 0;
   list-style: none;
-  counter-reset: step;
 }
 
-.roadmap li {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-radius: 12px;
+.steps li {
+  padding: 22px;
+  border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--surface);
-  color: var(--muted);
 }
 
-.roadmap li::before {
-  content: '';
-  flex: none;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  border: 2px solid var(--line);
-}
-
-.roadmap li.is-done {
-  color: var(--ink);
-}
-
-.roadmap li.is-done::before {
-  content: '✓';
-  display: grid;
+.step-number {
+  display: inline-grid;
   place-items: center;
-  border-color: var(--felt);
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  border-radius: 50%;
   background: var(--felt);
   color: #06120c;
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
   font-weight: 700;
 }
 
-/* Étape prévue plus tard (mise en production) */
-.roadmap li.is-later {
-  border-style: dashed;
+.steps h3 {
+  font-size: 1.15rem;
 }
 
-.roadmap li.is-later::before {
-  border-style: dashed;
-}
-
-.tag-later {
-  margin-left: auto;
-  flex: none;
-  padding: 2px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(62, 142, 247, 0.4);
-  background: rgba(62, 142, 247, 0.1);
-  color: var(--blue);
-  font-size: 0.75rem;
-  font-style: normal;
-  font-weight: 600;
-}
-
-.bonus {
-  margin: 18px 0 0;
+.steps p {
+  margin: 8px 0 0;
   color: var(--muted);
-  font-size: 0.95rem;
+}
+
+/* Appel final */
+.cta {
+  padding: 44px 24px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: radial-gradient(ellipse 70% 90% at 50% 0%, rgba(47, 191, 113, 0.16), transparent 70%), var(--surface);
+  text-align: center;
+}
+
+.cta p {
+  margin: 12px auto 24px;
+  max-width: 34em;
+  color: var(--muted);
+}
+
+.footer a {
+  color: var(--ink);
 }
 
 /* ---------- Pied de page ---------- */

@@ -1,32 +1,24 @@
 # RiverLog · Suivi de bankroll poker
 
-> Jour 03 du défi **30 jours, 30 projets** · Laravel, Blade et Chart.js · 🚧 **En développement**
+> Jour 03 du défi **30 jours, 30 projets** · Laravel, Blade, MySQL et Chart.js · 🟢 **En ligne : [riverlog.alwaysdata.net](https://riverlog.alwaysdata.net)**
 
 ![Page vitrine de RiverLog](docs/preview.png)
 
-RiverLog enregistre chaque session de poker et calcule ce qui compte vraiment : **le profit net, le taux horaire et l'évolution des résultats**, format par format.
+RiverLog suit votre bankroll poker et analyse vos tournois : **profit net, taux horaire, ROI et évolution des résultats**, à partir de sessions saisies à la main ou d'historiques de mains importés.
 
-Le cœur du projet n'est pas le CRUD, mais **des statistiques fiables** : cartes, courbe et tableau utilisent toujours le même ensemble de sessions filtrées, calculé côté serveur.
+Le cœur du projet n'est pas le CRUD, mais **des statistiques fiables** : cartes, courbes et tableaux utilisent toujours le même ensemble de données filtrées, calculé côté serveur, et chaque main importée est contrôlée.
 
-📄 Le détail de la V1 est dans le [cahier des charges](CAHIER_DES_CHARGES.md).
+📄 Le détail est dans le [cahier des charges](CAHIER_DES_CHARGES.md).
 
-## Fonctionnalités prévues (V1)
+## Fonctionnalités
 
-- **Sessions** : date et heure, format (Cash Game, MTT, Sit & Go), durée en minutes, résultat net (négatif pour une perte) et notes. Ajout, modification et suppression.
-- **Tableau de bord** : profit net, nombre de sessions, temps joué et taux horaire, plus une courbe du profit cumulé (Chart.js).
-- **Filtres** par format, période et résultat, transmis dans l'adresse (`?format=mtt&from=…&to=…&result=win`) : les statistiques, la courbe et le tableau sont recalculés.
-- **Des calculs sans piège** : jamais de division par zéro, taux horaire négatif possible, ordre chronologique respecté.
-
-## Avancement
-
-- [x] Projet Laravel installé et cahier des charges rédigé
-- [x] Page vitrine
-- [ ] Sessions : base de données, ajout, modification, suppression
-- [ ] Calculs : profit net, temps joué, taux horaire (`BankrollStatsService`)
-- [ ] Dashboard : cartes statistiques, tableau et courbe Chart.js
-- [ ] Filtres par format, période et résultat, dans l'URL
-- [ ] Tests, documentation et données de démonstration
-- [ ] Mise en production, avec une vraie base de données (plus tard)
+- **Comptes** : inscription, connexion ; chacun ne voit que ses propres données. Une **démo publique** en lecture seule montre un dashboard et des tournois fictifs (`/demo`).
+- **Sessions** : date, format (Cash Game, MTT, Sit & Go, Spin), durée, résultat et notes. Ajout, modification, suppression.
+- **Dashboard** : profit net, taux horaire, sessions, temps joué et courbe du profit cumulé, avec des **filtres** par format, période et résultat gardés dans l'URL.
+- **Import Betclic** : fichiers `.txt` ou `.zip`, doublons ignorés, réimport sans risque. Les tournois proches sont regroupés en **sessions automatiques**.
+- **Tournois** : ROI, victoires, places finales, conversion en heads-up, résultats par multiplicateur et par buy-in, ROI hors jackpots.
+- **Détail d'un tournoi** : chaque main avec cartes, board, tapis en big blinds et jetons gagnés ou perdus.
+- **Qualité** : 70 tests automatisés sur MySQL, CI/CD GitHub Actions (tests puis déploiement automatique sur Alwaysdata).
 
 ## Lancer en local
 
@@ -58,7 +50,9 @@ Puis ouvrir http://127.0.0.1:8000 (la démo publique est sur `/demo`).
 
 ## Hébergement
 
-Le projet est **maintenu en local pour le moment**. Le site du défi est hébergé sur Netlify, qui ne peut pas exécuter de PHP. Si une solution d'hébergement simple se présente, RiverLog sera mis en ligne avec une base de données fonctionnelle.
+RiverLog est hébergé sur **[Alwaysdata](https://www.alwaysdata.com)** (PHP 8.4, MySQL) : **https://riverlog.alwaysdata.net**.
+
+Chaque push sur `master` lance le workflow [CI / CD](.github/workflows/main.yml) : les tests tournent sur PHP 8.3 + MySQL 8.4, puis, s'ils passent, le serveur est mis à jour en SSH par [deploy.sh](deploy.sh) (code, dépendances, migrations, caches). Les secrets (clé SSH, empreinte du serveur) sont stockés dans GitHub, jamais dans le dépôt.
 
 ## Technologies
 

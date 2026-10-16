@@ -170,9 +170,9 @@ Tables complémentaires : `users` (comptes), `hand_imports`, `tournaments`, `han
 
 ### Hébergement et mise en production
 
-- **Pour le moment, le projet est maintenu en local** (`php artisan serve` et serveur MySQL local). Le site du défi est hébergé sur Netlify, qui ne peut pas exécuter de PHP : RiverLog n'y est donc pas publié, et sa carte renvoie vers le code sur GitHub.
-- **Mise en production plus tard :** si une solution d'hébergement simple et pratique se présente, le projet sera mis en ligne **avec une base de données fonctionnelle**, pour que l'outil soit utilisable directement depuis le navigateur.
-- Ce point ne bloque pas la V1 : le code doit simplement rester facile à déployer (configuration dans `.env`, migrations et seeders à jour).
+- **En ligne sur Alwaysdata** : https://riverlog.alwaysdata.net (PHP 8.4, base MySQL de l'hébergeur). Le site du défi reste sur Netlify, qui ne peut pas exécuter de PHP : sa carte renvoie vers cette adresse.
+- **Déploiement continu** : le workflow GitHub Actions `.github/workflows/main.yml` lance les tests (PHP 8.3 + MySQL 8.4) à chaque push ; sur `master`, s'ils passent, il met le serveur à jour en SSH avec `deploy.sh` (code, `composer install --no-dev`, migrations, caches). Clé SSH et empreinte du serveur sont des secrets GitHub.
+- **En local** : `php artisan serve` et un serveur MySQL local, pour développer et tester avant de pousser.
 - **Base en production :** une base MySQL 8 (ou MariaDB compatible) fournie par l'hébergeur, avec un utilisateur dédié aux droits limités. Le déploiement se résume à renseigner les variables `DB_*` puis lancer `php artisan migrate --force`.
 
 ---
