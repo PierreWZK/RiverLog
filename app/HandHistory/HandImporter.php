@@ -8,6 +8,7 @@ use App\Models\Tournament;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use ZipArchive;
 
 /**
@@ -37,33 +38,131 @@ class HandImporter
     /**
      * Importe un fichier envoyé (.txt ou .zip) et le garde en privé.
      *
+     * @param  (\Closure(string $step, int $done, int $total): void)|null  $progress  suivi de l'avancement
+     *
      * @throws ImportException si le fichier entier est inutilisable
      */
-    public function importUpload(User $user, UploadedFile $file): HandImport
+    public function importUpload(User $user, UploadedFile $file, ?\Closure $progress = null): HandImport
     {
         $sha = hash_file('sha256', $file->getRealPath());
-        $extension = strtolower($file->getClientOriginalExtension());
+        $texts = $this->readUpload($file);
+        $storedPath = $this->storeUpload($user, $file, $sha);
 
-        $texts = $extension === 'zip'
-            ? $this->unzip($file->getRealPath())
-            : [$file->getClientOriginalName() => (string) file_get_contents($file->getRealPath())];
-
-        // Stockage privé (storage/app/private), jamais servi directement
-        $storedPath = $file->storeAs("imports/{$user->id}", "{$sha}.{$extension}", 'local');
-
-        return $this->importTexts($user, $file->getClientOriginalName(), $sha, $texts, $storedPath ?: null);
+        return $this->importTexts($user, $file->getClientOriginalName(), $sha, $texts, $storedPath, $progress);
     }
 
     /**
+     * Étapes signalées à $progress : « parse » (par fichier), « store » (par main), « refresh » (fin).
+     *
      * @param  array<string, string>  $texts  nom du fichier => contenu
+     * @param  (\Closure(string $step, int $done, int $total): void)|null  $progress
      */
-    public function importTexts(User $user, string $filename, string $sha, array $texts, ?string $storedPath = null): HandImport
+    public function importTexts(User $user, string $filename, string $sha, array $texts, ?string $storedPath = null, ?\Closure $progress = null): HandImport
+    {
+        $progress ??= fn () => null;
+        [$site, $hands, $errors] = $this->parseTexts($texts, $progress);
+
+        return DB::transaction(function () use ($user, $filename, $sha, $storedPath, $site, $hands, $errors, $progress) {
+            $import = $user->handImports()->create([
+                'filename' => $filename,
+                'stored_path' => $storedPath,
+                'sha256' => $sha,
+                'site' => $site,
+                'hands_found' => count($hands),
+                'errors' => $errors ?: null,
+            ]);
+
+            [$imported, $tournaments] = $this->storeHands($import, $hands, $progress);
+
+            $import->update([
+                'hands_imported' => $imported,
+                'duplicates' => count($hands) - $imported,
+                'tournaments_touched' => $tournaments,
+            ]);
+
+            return $import;
+        });
+    }
+
+    /**
+     * Relance un import (après une correction de la lecture des historiques) : le fichier est relu,
+     * les mains qui manquaient sont ajoutées à cet import et ses erreurs remplacées.
+     * Sans $file, c'est le fichier conservé à l'import qui est relu.
+     *
+     * @param  (\Closure(string $step, int $done, int $total): void)|null  $progress
+     *
+     * @throws ImportException si le fichier est introuvable ou inutilisable
+     */
+    public function retry(HandImport $import, ?UploadedFile $file = null, ?\Closure $progress = null): HandImport
+    {
+        $progress ??= fn () => null;
+        $disk = Storage::disk('local');
+        $stored = $import->stored_path && $disk->exists($import->stored_path);
+
+        if ($file !== null) {
+            $texts = $this->readUpload($file);
+            if (! $stored) {
+                $import->stored_path = $this->storeUpload($import->user, $file, $import->sha256);
+            }
+        } elseif ($stored) {
+            $path = $disk->path($import->stored_path);
+            $texts = strtolower(pathinfo($path, PATHINFO_EXTENSION)) === 'zip'
+                ? $this->unzip($path)
+                : [$import->filename => (string) file_get_contents($path)];
+        } else {
+            throw new ImportException('Le fichier d\'origine n\'est plus disponible : déposez-le à nouveau pour relancer l\'import.');
+        }
+
+        [$site, $hands, $errors] = $this->parseTexts($texts, $progress);
+
+        return DB::transaction(function () use ($import, $site, $hands, $errors, $progress) {
+            $this->storeHands($import, $hands, $progress);
+
+            $imported = $import->hands()->count();
+            $import->update([
+                'stored_path' => $import->stored_path,
+                'site' => $site ?? $import->site,
+                'hands_found' => count($hands),
+                'hands_imported' => $imported,
+                'duplicates' => max(0, count($hands) - $imported),
+                'tournaments_touched' => $import->hands()->distinct()->count('tournament_id'),
+                'errors' => $errors ?: null,
+            ]);
+
+            return $import;
+        });
+    }
+
+    /** @return array<string, string> nom du fichier => contenu */
+    private function readUpload(UploadedFile $file): array
+    {
+        return strtolower($file->getClientOriginalExtension()) === 'zip'
+            ? $this->unzip($file->getRealPath())
+            : [$file->getClientOriginalName() => (string) file_get_contents($file->getRealPath())];
+    }
+
+    /** Stockage privé (storage/app/private), jamais servi directement. */
+    private function storeUpload(User $user, UploadedFile $file, string $sha): ?string
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        return $file->storeAs("imports/{$user->id}", "{$sha}.{$extension}", 'local') ?: null;
+    }
+
+    /**
+     * @param  array<string, string>  $texts
+     * @param  \Closure(string, int, int): void  $progress
+     * @return array{0: ?string, 1: list<ParsedHand>, 2: list<array<string, mixed>>}
+     */
+    private function parseTexts(array $texts, \Closure $progress): array
     {
         $hands = [];
         $errors = [];
         $site = null;
+        $parsed = 0;
 
         foreach ($texts as $name => $content) {
+            $progress('parse', $parsed++, count($texts));
             $parser = $this->parsers->for($content);
             if ($parser === null) {
                 $errors[] = ['file' => $name, 'block' => 0, 'hand_id' => null, 'message' => 'Format non reconnu : seuls les exports Betclic sont pris en charge pour l\'instant.'];
@@ -79,50 +178,52 @@ class HandImporter
             }
         }
 
-        return DB::transaction(function () use ($user, $filename, $sha, $storedPath, $site, $hands, $errors) {
-            $import = $user->handImports()->create([
-                'filename' => $filename,
-                'stored_path' => $storedPath,
-                'sha256' => $sha,
-                'site' => $site,
-                'hands_found' => count($hands),
-                'errors' => $errors ?: null,
-            ]);
+        $progress('parse', count($texts), count($texts));
 
-            // Mains déjà connues de ce compte (ou présentes deux fois dans le fichier) : ignorées
-            $known = $user->hands()
-                ->whereIn('external_id', array_map(fn (ParsedHand $h) => $h->handId, $hands))
-                ->pluck('external_id')
-                ->flip()
-                ->all();
+        return [$site, $hands, $errors];
+    }
 
-            $tournaments = [];
-            $imported = 0;
+    /**
+     * Enregistre les mains encore inconnues du compte, puis recalcule tournois et sessions.
+     *
+     * @param  list<ParsedHand>  $hands
+     * @param  \Closure(string, int, int): void  $progress
+     * @return array{0: int, 1: int} mains ajoutées, tournois touchés
+     */
+    private function storeHands(HandImport $import, array $hands, \Closure $progress): array
+    {
+        $user = $import->user;
 
-            foreach ($hands as $hand) {
-                if (isset($known[$hand->handId])) {
-                    continue;
-                }
-                $known[$hand->handId] = true;
+        // Mains déjà connues de ce compte (ou présentes deux fois dans le fichier) : ignorées
+        $known = $user->hands()
+            ->whereIn('external_id', array_map(fn (ParsedHand $h) => $h->handId, $hands))
+            ->pluck('external_id')
+            ->flip()
+            ->all();
 
-                $tournament = $tournaments[$hand->gameId] ??= $this->tournamentFor($user, $hand);
-                $this->storeHand($user, $import, $tournament, $hand);
-                $imported++;
+        $tournaments = [];
+        $imported = 0;
+
+        foreach ($hands as $index => $hand) {
+            $progress('store', $index, count($hands));
+            if (isset($known[$hand->handId])) {
+                continue;
             }
+            $known[$hand->handId] = true;
 
-            foreach ($tournaments as $tournament) {
-                $this->aggregator->refresh($tournament);
-            }
-            $this->sessions->rebuild($user);
+            $tournament = $tournaments[$hand->gameId] ??= $this->tournamentFor($user, $hand);
+            $this->storeHand($user, $import, $tournament, $hand);
+            $imported++;
+        }
 
-            $import->update([
-                'hands_imported' => $imported,
-                'duplicates' => count($hands) - $imported,
-                'tournaments_touched' => count($tournaments),
-            ]);
+        $progress('store', count($hands), count($hands));
+        $progress('refresh', 0, 1);
+        foreach ($tournaments as $tournament) {
+            $this->aggregator->refresh($tournament);
+        }
+        $this->sessions->rebuild($user);
 
-            return $import;
-        });
+        return [$imported, count($tournaments)];
     }
 
     /** Supprime un import, ses mains et son fichier, puis recalcule tournois et sessions. */
@@ -138,7 +239,7 @@ class HandImporter
         });
 
         if ($import->stored_path) {
-            \Illuminate\Support\Facades\Storage::disk('local')->delete($import->stored_path);
+            Storage::disk('local')->delete($import->stored_path);
         }
     }
 

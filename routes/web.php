@@ -45,5 +45,6 @@ Route::middleware('auth')->group(function () {
 
     // Import d'historiques de mains et tournois importés
     Route::resource('imports', HandImportController::class)->only(['index', 'store', 'destroy']);
+    Route::post('/imports/{import}/retry', [HandImportController::class, 'retry'])->name('imports.retry');
     Route::resource('tournaments', TournamentController::class)->only(['index', 'show']);
 });

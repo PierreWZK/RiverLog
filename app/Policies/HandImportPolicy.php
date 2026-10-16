@@ -15,4 +15,9 @@ class HandImportPolicy
     {
         return $user->id === $import->user_id ? Response::allow() : Response::denyAsNotFound();
     }
+
+    public function retry(User $user, HandImport $import): Response
+    {
+        return $this->delete($user, $import);
+    }
 }

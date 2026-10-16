@@ -160,11 +160,11 @@
                                     <td class="notes">{{ $session->notes }}</td>
                                     @if ($demo)
                                     @elseif ($session->isImported())
-                                    {{-- Recalculée à chaque import : on la consulte via ses tournois --}}
+                                    {{-- Recalculée à chaque import : on la consulte via ses parties importées --}}
                                     <td class="actions">
-                                        <a href="{{ route('tournaments.index', ['from' => $session->played_at->toDateString(), 'to' => $session->played_at->toDateString()]) }}"
-                                           class="icon-btn" title="Voir les tournois">
-                                            <span class="sr-only">Voir les tournois du {{ $session->played_at->format('d/m/Y') }}</span>→
+                                        <a href="{{ route('imports.index', ['from' => $session->played_at->toDateString(), 'to' => $session->played_at->toDateString()]) }}#parties"
+                                           class="icon-btn" title="Voir les parties importées">
+                                            <span class="sr-only">Voir les parties importées du {{ $session->played_at->format('d/m/Y') }}</span>→
                                         </a>
                                     </td>
                                     @else

@@ -1002,6 +1002,103 @@ td .bar + small {
   margin-top: 16px;
 }
 
+/* Parties importées, entre le formulaire d'envoi et l'historique */
+.imported {
+  margin: 32px 0;
+  scroll-margin-top: 16px;
+}
+
+.section-title {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+/* Barre de progression de l'import (import.js) */
+.import-progress {
+  margin-top: 16px;
+}
+
+.import-progress-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.import-progress-head span {
+  overflow-wrap: anywhere;
+}
+
+.import-progress-head strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.import-progress-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.import-progress-bar {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--felt);
+  transition: width 0.2s ease-out;
+}
+
+.import-progress.is-failed .import-progress-bar {
+  background: var(--red);
+}
+
+.import-progress-files {
+  display: grid;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.import-progress-files .is-current {
+  color: var(--ink);
+}
+
+.import-progress-files .is-ok::marker {
+  color: var(--felt);
+}
+
+.import-progress-files .is-failed {
+  color: var(--red);
+}
+
+/* Relance d'un import en cours */
+.icon-btn.is-busy {
+  cursor: progress;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .import-progress-bar {
+    transition: none;
+  }
+
+  .icon-btn.is-busy {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
 .import-rules ul {
   display: grid;
   gap: 8px;

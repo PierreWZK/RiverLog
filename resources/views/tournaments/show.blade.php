@@ -6,7 +6,7 @@
 @section('title', $tournament->game_name)
 
 @php
-    $back = $demo ? route('demo.tournaments.index') : route('tournaments.index');
+    $back = $demo ? route('demo.tournaments.index') : route('imports.index').'#parties';
     $place = $tournament->finish_position;
     $positions = ['BTN' => 'Bouton', 'SB' => 'Petite blinde', 'BB' => 'Grosse blinde'];
 @endphp
@@ -14,7 +14,7 @@
 @section('content')
     <div class="page-head">
         <div>
-            <a href="{{ $back }}" class="back">← Tournois</a>
+            <a href="{{ $back }}" class="back">← {{ $demo ? 'Parties importées' : 'Import' }}</a>
             <h1>{{ $tournament->game_name }} <span class="mult mult-lg">{{ $tournament->multiplierLabel() }}</span></h1>
             <p class="page-sub">
                 {{ $tournament->started_at->translatedFormat('d/m/Y') }} de {{ $tournament->started_at->format('H:i') }} à {{ $tournament->ended_at->format('H:i') }}

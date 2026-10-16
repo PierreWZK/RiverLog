@@ -61,19 +61,27 @@ class TournamentStatsTest extends TestCase
         $this->assertSame(71.4, $stats->jackpotShare); // 10 € sur 14 € de gains
     }
 
-    public function test_page_tournois_et_filtres(): void
+    public function test_parties_importees_sur_la_page_import(): void
     {
         $this->actingAs($this->user)
-            ->get('/tournaments')
+            ->get('/imports')
             ->assertOk()
+            ->assertSee('Parties importées')
             ->assertSee("+180,0\u{00A0}%", false)
-            ->assertSee('Échantillon de 5 tournois', false)
+            ->assertSee('Échantillon de 5 parties', false)
             ->assertSee('Spin &amp; Rush 1€', false);
 
-        $this->get('/tournaments?multiplier=2')
+        $this->get('/imports?multiplier=2')
             ->assertOk()
             ->assertSee("\u{2212}100,0\u{00A0}%", false)
             ->assertSee('<option value="2" selected>', false);
+    }
+
+    public function test_l_ancienne_page_tournois_redirige_vers_import(): void
+    {
+        $this->actingAs($this->user)
+            ->get('/tournaments?multiplier=2')
+            ->assertRedirect('/imports?multiplier=2#parties');
     }
 
     public function test_detail_d_un_tournoi(): void
@@ -96,7 +104,7 @@ class TournamentStatsTest extends TestCase
         ]);
         $own = $this->user->tournaments()->first();
 
-        $this->get('/demo/tournaments')->assertOk()->assertSee('Exemple de tournois importés', false);
+        $this->get('/demo/tournaments')->assertOk()->assertSee('Exemple de parties importées', false);
         $this->get('/demo/tournaments/'.$demo->tournaments()->first()->id)->assertOk();
         // Un tournoi d'un vrai compte n'est pas visible via la démo
         $this->get("/demo/tournaments/{$own->id}")->assertNotFound();

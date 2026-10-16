@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\HandHistory\TournamentAggregator;
 use App\Models\Tournament;
+use App\Models\User;
+use App\Support\TournamentFilters;
 use App\Support\TournamentStats;
 use Illuminate\Support\Collection;
 
@@ -15,6 +17,28 @@ class TournamentStatsService
 {
     /** Multiplicateur à partir duquel un Spin compte comme « jackpot ». */
     public const JACKPOT_THRESHOLD = 10;
+
+    /**
+     * Données de la section « Parties importées » (page Import et démo) pour un compte.
+     *
+     * @return array<string, mixed>
+     */
+    public function overview(User $owner, TournamentFilters $filters): array
+    {
+        $tournaments = $filters->apply($owner->tournaments()->getQuery())
+            ->orderByDesc('started_at')
+            ->get();
+
+        return [
+            'filters' => $filters,
+            'stats' => $this->compute($tournaments),
+            'tournaments' => $tournaments,
+            'hasTournaments' => $owner->tournaments()->exists(),
+            // Valeurs proposées dans les filtres : celles réellement jouées
+            'multipliers' => $owner->tournaments()->whereNotNull('multiplier')->distinct()->orderBy('multiplier')->pluck('multiplier'),
+            'buyIns' => $owner->tournaments()->distinct()->orderBy('buy_in')->pluck('buy_in'),
+        ];
+    }
 
     /**
      * @param  Collection<int, Tournament>  $tournaments

@@ -238,7 +238,7 @@
                     @else
                         <a href="{{ route('register') }}" class="btn btn-primary">Créer mon compte →</a>
                     @endauth
-                    <a href="{{ route('demo.tournaments.index') }}" class="btn btn-ghost">Voir les tournois de démo</a>
+                    <a href="{{ route('demo.tournaments.index') }}" class="btn btn-ghost">Voir les parties de démo</a>
                 </div>
             </div>
         </section>

@@ -139,6 +139,88 @@ class HandImportTest extends TestCase
         $this->assertStringContainsString('Format non reconnu', $import->errors[0]['message']);
     }
 
+    public function test_import_avec_progression(): void
+    {
+        $response = $this->post('/imports', ['files' => [$this->upload($this->fixture())]], ['X-Import-Progress' => '1']);
+
+        $response->assertOk()->assertHeader('Content-Type', 'application/x-ndjson; charset=UTF-8');
+        $events = array_map('json_decode', array_filter(explode("
+", $response->streamedContent())));
+
+        $steps = array_unique(array_column($events, 'step'));
+        $this->assertSame(['parse', 'store', 'refresh', 'done'], array_values($steps));
+        $this->assertStringContainsString('41 mains importées', end($events)->message);
+        $this->assertSame(41, $this->user->hands()->count());
+
+        // Le message est repris par la page Import une fois rechargée
+        $this->get('/imports')->assertSee('41 mains importées');
+    }
+
+    public function test_jusqu_a_50_fichiers_par_envoi(): void
+    {
+        $files = fn (int $count) => array_map(fn ($i) => $this->upload("PokerStars Hand #{$i}", "export-{$i}.txt"), range(1, $count));
+
+        $this->post('/imports', ['files' => $files(50)])->assertSessionDoesntHaveErrors();
+        $this->assertSame(50, $this->user->handImports()->count());
+
+        $this->post('/imports', ['files' => $files(51)])->assertSessionHasErrors('files');
+    }
+
+    public function test_relancer_un_import_en_erreur(): void
+    {
+        // Une main illisible (verbe inconnu) : importée avec une erreur
+        $broken = str_replace('Posts SB 10', 'Posts XX 10', $this->fixture(), $count);
+        $this->assertGreaterThan(0, $count);
+        $this->post('/imports', ['files' => [$this->upload($broken)]]);
+        $import = $this->user->handImports()->sole();
+        $this->assertNotNull($import->errors);
+        $missing = 41 - $import->hands_imported;
+
+        // Le parseur est corrigé (simulé ici en remettant le bon texte dans le fichier conservé)
+        Storage::disk('local')->put($import->stored_path, $this->fixture());
+
+        $this->post("/imports/{$import->id}/retry")
+            ->assertRedirect('/imports')
+            ->assertSessionHas('status', "« export.txt » relancé : {$missing} mains ajoutées, 5 tournois mis à jour, plus aucune erreur.");
+
+        $import->refresh();
+        $this->assertNull($import->errors);
+        $this->assertSame([41, 41, 0], [$import->hands_found, $import->hands_imported, $import->duplicates]);
+        $this->assertSame(41, $this->user->hands()->count());
+    }
+
+    public function test_redeposer_un_fichier_en_erreur_relance_l_import(): void
+    {
+        $import = $this->user->handImports()->create([
+            'filename' => 'export.txt', 'sha256' => hash('sha256', $this->fixture()), 'hands_found' => 0,
+            'errors' => [['block' => 1, 'hand_id' => null, 'message' => 'Action illisible']],
+        ]);
+
+        $this->post('/imports', ['files' => [$this->upload($this->fixture())]])
+            ->assertSessionHas('status', '« export.txt » relancé : 41 mains ajoutées, 5 tournois mis à jour, plus aucune erreur.');
+
+        $this->assertSame(1, $this->user->handImports()->count());
+        Storage::disk('local')->assertExists($import->refresh()->stored_path);
+    }
+
+    public function test_relancer_sans_fichier_conserve(): void
+    {
+        $import = $this->user->handImports()->create([
+            'filename' => 'export.txt', 'sha256' => 'abc', 'hands_found' => 0,
+            'errors' => [['block' => 1, 'hand_id' => null, 'message' => 'Action illisible']],
+        ]);
+
+        $this->post("/imports/{$import->id}/retry")
+            ->assertSessionHas('status', fn ($status) => str_contains($status, 'déposez-le à nouveau'));
+    }
+
+    public function test_on_ne_relance_pas_l_import_d_un_autre(): void
+    {
+        $other = User::factory()->create()->handImports()->create(['filename' => 'x.txt', 'sha256' => 'abc', 'hands_found' => 0]);
+
+        $this->post("/imports/{$other->id}/retry")->assertNotFound();
+    }
+
     public function test_seuls_txt_et_zip_sont_acceptes(): void
     {
         $this->post('/imports', ['files' => [UploadedFile::fake()->create('photo.png', 10, 'image/png')]])
@@ -164,7 +246,7 @@ class HandImportTest extends TestCase
         $import = app(HandImporter::class)->importTexts($other, 'x.txt', str_repeat('a', 64), ['x.txt' => $this->fixture()]);
 
         $this->delete("/imports/{$import->id}")->assertNotFound();
-        $this->get('/tournaments')->assertDontSee('Spin & Rush');
+        $this->get('/imports')->assertDontSee('Spin & Rush');
         $this->get('/tournaments/'.$other->tournaments()->first()->id)->assertNotFound();
         $this->assertSame(0, $this->user->pokerSessions()->count());
     }

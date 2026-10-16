@@ -44,7 +44,7 @@
     </header>
 
     <main class="container app-main">
-        {{-- Onglets Sessions / Tournois / Import (ou ceux de la démo) --}}
+        {{-- Onglets Sessions / Import / Défis (ou ceux de la démo) --}}
         @if (($demo ?? false) || (auth()->check() && ! request()->routeIs('login', 'register')))
             @include('partials.tabs', ['demo' => $demo ?? false])
         @endif

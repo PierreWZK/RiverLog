@@ -6,21 +6,23 @@ use App\Models\Tournament;
 use App\Models\User;
 use App\Services\TournamentStatsService;
 use App\Support\TournamentFilters;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 /**
- * Page Tournois (statistiques des tournois importés) et détail d'un tournoi.
- * Les mêmes pages servent la démo publique, en lecture seule.
+ * Détail d'une partie importée. Les statistiques et la liste des parties sont sur la page Import ;
+ * la démo publique (lecture seule, sans import possible) garde sa propre page.
  */
 class TournamentController extends Controller
 {
     public function __construct(private TournamentStatsService $statsService) {}
 
-    public function index(Request $request): View
+    /** Ancienne page Tournois : les liens et favoris existants mènent à la page Import. */
+    public function index(Request $request): RedirectResponse
     {
-        return $this->renderIndex($request, $request->user(), demo: false);
+        return redirect()->to(route('imports.index', $request->query()).'#parties');
     }
 
     public function show(Tournament $tournament): View
@@ -32,7 +34,10 @@ class TournamentController extends Controller
 
     public function demoIndex(Request $request): View
     {
-        return $this->renderIndex($request, $this->demoUser(), demo: true);
+        return view('tournaments.index', [
+            'demo' => true,
+            ...$this->statsService->overview($this->demoUser(), TournamentFilters::fromRequest($request)),
+        ]);
     }
 
     public function demoShow(Tournament $tournament): View
@@ -40,25 +45,6 @@ class TournamentController extends Controller
         abort_unless($tournament->user_id === $this->demoUser()->id, 404);
 
         return $this->renderShow($tournament, demo: true);
-    }
-
-    private function renderIndex(Request $request, User $owner, bool $demo): View
-    {
-        $filters = TournamentFilters::fromRequest($request);
-        $tournaments = $filters->apply($owner->tournaments()->getQuery())
-            ->orderByDesc('started_at')
-            ->get();
-
-        return view('tournaments.index', [
-            'demo' => $demo,
-            'filters' => $filters,
-            'stats' => $this->statsService->compute($tournaments),
-            'tournaments' => $tournaments,
-            'hasTournaments' => $owner->tournaments()->exists(),
-            // Valeurs proposées dans les filtres : celles réellement jouées
-            'multipliers' => $owner->tournaments()->whereNotNull('multiplier')->distinct()->orderBy('multiplier')->pluck('multiplier'),
-            'buyIns' => $owner->tournaments()->distinct()->orderBy('buy_in')->pluck('buy_in'),
-        ]);
     }
 
     private function renderShow(Tournament $tournament, bool $demo): View
