@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,14 +11,15 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
+     *
+     * Crée le compte de démonstration, ses sessions et ses tournois importés (affichés sur /demo).
+     * Les vrais comptes se créent depuis la page d'inscription.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            PokerSessionSeeder::class, // compte de démo et sessions saisies à la main
+            DemoSpinSeeder::class,     // Spins fictifs importés (page Tournois de la démo)
         ]);
     }
 }

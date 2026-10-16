@@ -30,18 +30,31 @@ Le cœur du projet n'est pas le CRUD, mais **des statistiques fiables** : cartes
 
 ## Lancer en local
 
-Prérequis : PHP 8.3 ou plus récent avec les extensions `pdo_sqlite` et `sqlite3` activées dans `php.ini`, et Composer.
+Prérequis : PHP 8.3 ou plus récent avec l'extension `pdo_mysql` (et `zip` pour importer des archives), Composer, et un serveur **MySQL 8.4** (sous Windows : `winget install Oracle.MySQL`).
+
+**1. Créer les bases et l'utilisateur** (dans `mysql -u root -p` ou MySQL Workbench) :
+
+```sql
+CREATE DATABASE riverlog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE riverlog_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'riverlog'@'localhost' IDENTIFIED BY 'un-mot-de-passe';
+GRANT ALL PRIVILEGES ON riverlog.* TO 'riverlog'@'localhost';
+GRANT ALL PRIVILEGES ON riverlog_test.* TO 'riverlog'@'localhost';
+```
+
+**2. Installer l'application :**
 
 ```bash
 composer install
-cp .env.example .env
+cp .env.example .env          # puis renseigner DB_PASSWORD
 php artisan key:generate
-touch database/database.sqlite
-php artisan migrate
+php artisan migrate --seed    # tables + compte de démonstration
 php artisan serve
 ```
 
-Puis ouvrir http://127.0.0.1:8000.
+Puis ouvrir http://127.0.0.1:8000 (la démo publique est sur `/demo`).
+
+**Tests** : `php artisan test`. Ils utilisent la base `riverlog_test`, vidée à chaque test : la base de l'application n'est jamais touchée.
 
 ## Hébergement
 
@@ -49,4 +62,4 @@ Le projet est **maintenu en local pour le moment**. Le site du défi est héberg
 
 ## Technologies
 
-Laravel 13, Blade, SQLite, Chart.js (à venir). Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).
+Laravel 13, Blade, MySQL 8.4, Chart.js. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).

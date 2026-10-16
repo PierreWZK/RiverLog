@@ -25,7 +25,14 @@
             <img src="{{ asset('riverlog.svg') }}" alt="" width="30" height="30">
             RiverLog
         </a>
-        <a href="{{ $repo }}" class="nav-link" target="_blank" rel="noopener">GitHub ↗</a>
+        <nav class="nav-actions">
+            <a href="{{ $repo }}" class="nav-link nav-github" target="_blank" rel="noopener">GitHub ↗</a>
+            @auth
+                <a href="{{ route('dashboard') }}" class="nav-link">Mon dashboard</a>
+            @else
+                <a href="{{ route('login') }}" class="nav-link">Connexion</a>
+            @endauth
+        </nav>
     </header>
 
     <main>
@@ -39,8 +46,12 @@
                 format par format.
             </p>
             <div class="hero-actions">
-                <a href="{{ $repo }}" class="btn btn-primary" target="_blank" rel="noopener">Suivre le développement →</a>
-                <a href="{{ $spec }}" class="btn btn-ghost" target="_blank" rel="noopener">Lire le cahier des charges</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="btn btn-primary">Ouvrir mon dashboard →</a>
+                @else
+                    <a href="{{ route('register') }}" class="btn btn-primary">Créer mon compte →</a>
+                @endauth
+                <a href="{{ route('demo') }}" class="btn btn-ghost">Voir un exemple de dashboard</a>
             </div>
 
             {{-- Aperçu du dashboard, avec des données fictives --}}
@@ -91,7 +102,7 @@
         {{-- Fonctionnalités --}}
         <section class="section container">
             <h2>Ce que fera l'outil</h2>
-            <p class="section-lead">Une seule bankroll, sans compte ni inscription : vous saisissez vos sessions, RiverLog fait les calculs.</p>
+            <p class="section-lead">Créez votre compte : vous saisissez vos sessions, RiverLog fait les calculs. Vos données restent privées, visibles par vous seul.</p>
 
             <div class="features">
                 <article class="feature">
@@ -159,6 +170,7 @@
                 <li class="is-done"><span>Projet Laravel installé et cahier des charges rédigé</span></li>
                 <li class="is-done"><span>Page vitrine</span></li>
                 <li><span>Sessions : base de données, ajout, modification, suppression</span></li>
+                <li><span>Comptes personnels : chacun ses sessions, plus un dashboard de démonstration</span></li>
                 <li><span>Calculs : profit net, temps joué, taux horaire</span></li>
                 <li><span>Dashboard : cartes statistiques, tableau et courbe Chart.js</span></li>
                 <li><span>Filtres par format, période et résultat, dans l'URL</span></li>

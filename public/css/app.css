@@ -1,0 +1,1156 @@
+/* ==========================================================================
+   RiverLog · application (dashboard et formulaires)
+   S'appuie sur landing.css : variables, boutons, cartes .stat, pied de page
+   ========================================================================== */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app > .container {
+  width: 100%; /* sinon le header et le footer rétrécissent dans la colonne flex */
+}
+
+.app-main {
+  flex: 1;
+  padding-block: 8px 56px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Navigation ---------- */
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-link.is-current {
+  border-color: var(--felt);
+  color: var(--felt);
+}
+
+.btn-sm {
+  white-space: nowrap;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
+
+.btn {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  color: inherit;
+  background: transparent;
+}
+
+.btn.btn-sm {
+  font-size: 0.9rem;
+}
+
+.btn-primary {
+  color: #06120c;
+  background: var(--felt);
+}
+
+/* ---------- En-tête de page ---------- */
+
+.page-head {
+  margin-bottom: 22px;
+}
+
+.page-head h1 {
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.page-sub {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--ink);
+}
+
+.flash {
+  margin: 0 0 20px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(47, 191, 113, 0.4);
+  background: rgba(47, 191, 113, 0.1);
+  color: var(--felt);
+  font-weight: 500;
+  animation: flash-in 0.3s ease-out;
+}
+
+@keyframes flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* ---------- Champs ---------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field > span,
+.field > legend {
+  padding: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.field em {
+  font-style: normal;
+  font-weight: 400;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.field input,
+.field select {
+  height: 42px; /* même hauteur pour les dates et les listes */
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--felt);
+  box-shadow: 0 0 0 3px rgba(47, 191, 113, 0.2);
+}
+
+.field [aria-invalid='true'] {
+  border-color: var(--red);
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.hint:empty {
+  display: none;
+}
+
+.error {
+  color: var(--red);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* ---------- Filtres ---------- */
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.filters-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.filters-actions .btn {
+  padding-block: 10px;
+}
+
+/* ---------- Cartes et panneaux ---------- */
+
+.app-stats {
+  margin-bottom: 18px;
+}
+
+.app-stats .stat {
+  background: var(--surface);
+}
+
+.panel {
+  margin-bottom: 18px;
+  padding: 20px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 1.05rem;
+}
+
+.count {
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.chart-box {
+  position: relative;
+  height: 300px;
+}
+
+/* ---------- Tableau ---------- */
+
+.table-wrap {
+  overflow-x: auto;
+  margin-inline: -20px;
+  padding-inline: 20px;
+}
+
+.sessions {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+}
+
+.sessions th {
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sessions td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.sessions tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.sessions tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.sessions .num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+.sessions .date {
+  white-space: nowrap;
+}
+
+.sessions .date small {
+  margin-left: 6px;
+  color: var(--muted);
+}
+
+.result {
+  font-weight: 700;
+}
+
+.result.is-up {
+  color: var(--felt);
+}
+
+.result.is-down {
+  color: var(--red);
+}
+
+.notes {
+  max-width: 280px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* Format : une pastille de la couleur d'un jeton */
+.format {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.format::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+}
+
+.format-cash::before { background: var(--felt); }
+.format-mtt::before { background: var(--gold); }
+.format-sng::before { background: var(--blue); }
+.format-spin::before { background: var(--red); }
+
+/* Session générée par un import, tournoi incomplet */
+.badge-import {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(62, 142, 247, 0.4);
+  color: var(--blue);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.icon-btn:hover {
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.icon-btn.is-danger:hover {
+  border-color: rgba(229, 72, 77, 0.4);
+  background: rgba(229, 72, 77, 0.1);
+  color: var(--red);
+}
+
+/* ---------- États vides ---------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 24px;
+  border-radius: var(--radius);
+  border: 1px dashed var(--line);
+  text-align: center;
+}
+
+.empty h2 {
+  font-size: 1.3rem;
+}
+
+.empty p {
+  max-width: 32em;
+  margin: 0 0 8px;
+  color: var(--muted);
+}
+
+/* ---------- Formulaire de session ---------- */
+
+.form {
+  max-width: 720px;
+  padding: 24px;
+}
+
+.form-alert {
+  margin: 0 0 18px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(229, 72, 77, 0.4);
+  background: rgba(229, 72, 77, 0.1);
+  color: var(--red);
+  font-size: 0.92rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* minmax : les champs date ne débordent pas */
+  gap: 18px;
+}
+
+.field-wide {
+  grid-column: 1 / -1;
+}
+
+/* Choix du format en boutons segmentés */
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.segmented label {
+  position: relative;
+  flex: 1;
+}
+
+/* Bouton radio invisible mais toujours accessible au clavier */
+.segmented input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented span {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 7px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.segmented span:hover {
+  color: var(--ink);
+}
+
+.segmented input:checked + span {
+  background: var(--felt);
+  color: #06120c;
+}
+
+.segmented input:focus-visible + span {
+  outline: 2px solid var(--felt);
+  outline-offset: 2px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* ---------- Menu du compte ---------- */
+
+.account {
+  position: relative;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 255, 255, 0.55);
+  background: var(--gold);
+  color: #3a2a05;
+  font-family: var(--font-title);
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.avatar::-webkit-details-marker {
+  display: none;
+}
+
+.account-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 220px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.8);
+}
+
+.account-menu span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.account-menu form {
+  margin-top: 10px;
+}
+
+.account-menu .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---------- Bandeau de la démo ---------- */
+
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(245, 185, 66, 0.4);
+  background: rgba(245, 185, 66, 0.08);
+}
+
+.demo-banner strong {
+  display: block;
+  color: var(--gold);
+}
+
+.demo-banner span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* ---------- Connexion et inscription ---------- */
+
+.auth {
+  display: grid;
+  place-items: center;
+  padding-block: 12px 24px;
+}
+
+.auth-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 420px;
+  margin: 0;
+  padding: 28px;
+}
+
+.auth-card .feature-icon {
+  margin-bottom: 0;
+}
+
+.auth-card h1 {
+  font-size: 1.8rem;
+}
+
+.auth-card .page-sub {
+  margin-top: -10px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--felt);
+}
+
+.btn-block {
+  justify-content: center;
+  width: 100%;
+}
+
+.auth-switch {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.auth-switch a {
+  color: var(--felt);
+  font-weight: 600;
+}
+
+/* ---------- Onglets ---------- */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 10px 14px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  color: var(--muted);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: var(--ink);
+}
+
+.tab.is-current {
+  border-color: var(--felt);
+  color: var(--ink);
+}
+
+/* ---------- Statistiques des tournois ---------- */
+
+.sample-warning {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px dashed rgba(245, 185, 66, 0.5);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.sample-warning strong {
+  color: var(--gold);
+}
+
+.stat dd small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.stat-note {
+  display: block;
+  margin-top: 2px;
+  color: var(--blue);
+  font-size: 0.75rem;
+}
+
+.stats-secondary dd {
+  font-size: 1.15rem;
+}
+
+.panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 18px;
+}
+
+.panel-title small,
+.panel-unit {
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.panel-title-sub {
+  margin-top: 22px;
+}
+
+.panel-note {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.panel-note strong {
+  color: var(--ink);
+  font-family: var(--font-mono);
+}
+
+.breakdown,
+.tournaments,
+.hands,
+.imports {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+:is(.breakdown, .tournaments, .hands, .imports) th {
+  padding: 0 10px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+:is(.breakdown, .tournaments, .hands, .imports) td {
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+:is(.breakdown, .tournaments, .hands, .imports) tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+:is(.breakdown, .tournaments, .hands, .imports) .num {
+  text-align: right;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+}
+
+:is(.breakdown, .tournaments, .hands) .is-up { color: var(--felt); }
+:is(.breakdown, .tournaments, .hands) .is-down { color: var(--red); }
+
+.muted {
+  color: var(--muted);
+}
+
+/* Barre de répartition */
+.bar {
+  display: block;
+  height: 6px;
+  min-width: 60px;
+  border-radius: 999px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--blue);
+}
+
+td .bar + small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.mult {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: rgba(245, 185, 66, 0.12);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.mult-lg {
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
+.positions {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.positions li {
+  display: grid;
+  grid-template-columns: 64px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.positions small {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.place {
+  display: inline-block;
+  min-width: 34px;
+  padding: 1px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.place-1 { background: rgba(245, 185, 66, 0.18); color: var(--gold); }
+.place-2 { color: var(--ink); }
+.place-3 { color: var(--muted); }
+
+.row-link {
+  cursor: pointer;
+}
+
+.row-link:hover td {
+  background: var(--surface-2);
+}
+
+.row-link a {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---------- Détail d'un tournoi ---------- */
+
+.chart-box-sm {
+  height: 220px;
+}
+
+.cards {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.card {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: #f4f6f4;
+  color: #1a1a1a;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.card b {
+  font-size: 0.8rem;
+}
+
+/* Jeu 4 couleurs */
+.card-h { color: #c8262d; }
+.card-d { color: #1f62c9; }
+.card-c { color: #13804a; }
+.card-s { color: #1a1a1a; }
+
+.cards-none {
+  color: var(--muted);
+}
+
+.pos {
+  display: inline-block;
+  min-width: 36px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.hands .is-final td {
+  background: rgba(245, 185, 66, 0.06);
+}
+
+.tags {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.tag {
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.tag-allin {
+  border-color: rgba(229, 72, 77, 0.4);
+  color: var(--red);
+}
+
+.tag-final {
+  border-color: rgba(245, 185, 66, 0.5);
+  color: var(--gold);
+}
+
+/* ---------- Import ---------- */
+
+.dropzone {
+  max-width: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  border-radius: 12px;
+  border: 2px dashed var(--line);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone-area:hover,
+.dropzone.is-dragging .dropzone-area {
+  border-color: var(--blue);
+  background: rgba(62, 142, 247, 0.06);
+}
+
+.dropzone.has-files .dropzone-area {
+  border-color: var(--felt);
+}
+
+.dropzone-area input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.dropzone-area strong {
+  overflow-wrap: anywhere;
+}
+
+.dropzone .error {
+  display: block;
+  margin-top: 8px;
+}
+
+.dropzone .form-actions {
+  margin-top: 16px;
+}
+
+.import-rules ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.import-rules strong {
+  color: var(--ink);
+}
+
+.filename {
+  max-width: 260px;
+  overflow-wrap: anywhere;
+}
+
+.ok {
+  color: var(--felt);
+  font-size: 0.85rem;
+}
+
+.import-errors summary {
+  color: var(--red);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.import-errors ul {
+  margin: 8px 0 0;
+  padding-left: 16px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.import-errors code {
+  font-size: 0.75rem;
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 860px) {
+  .filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .filters-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .chart-box {
+    height: 220px;
+  }
+
+  /* Tableau → une carte compacte par session :
+     date · résultat / format · durée / notes · actions.
+     Les autres tableaux gardent leur défilement horizontal. */
+  .table-wrap.table-cards {
+    overflow: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+
+  .sessions,
+  .sessions tbody {
+    display: block;
+  }
+
+  .sessions thead {
+    display: none;
+  }
+
+  .sessions tr {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    grid-template-areas:
+      'date result actions'
+      'fmt duration actions'
+      'notes notes notes';
+    align-items: center;
+    gap: 4px 12px;
+    padding: 12px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sessions tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .sessions td {
+    padding: 0;
+    border: 0;
+  }
+
+  .sessions .date { grid-area: date; }
+  .sessions .result { grid-area: result; }
+  .sessions .fmt { grid-area: fmt; }
+  .sessions .duration { grid-area: duration; color: var(--muted); font-size: 0.85rem; }
+  .sessions .notes { grid-area: notes; max-width: none; }
+  .sessions .notes:empty { display: none; }
+  .sessions .actions { grid-area: actions; flex-direction: column; gap: 2px; }
+
+  .form-actions .btn {
+    flex: 1;
+    white-space: nowrap;
+    justify-content: center;
+  }
+}
+
+/* Tournois : une seule colonne sur tablette et mobile */
+@media (max-width: 860px) {
+  .panel-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Très petits écrans : le logo seul suffit, la place va aux boutons du compte */
+@media (max-width: 440px) {
+  .app .logo-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
+/* Liste des tournois sur mobile : on garde date, multiplicateur, mains, place et net */
+@media (max-width: 600px) {
+  .tournaments :is(th, td):is(:nth-child(2), :nth-child(5)) {
+    display: none;
+  }
+
+  .tournaments td,
+  .tournaments th {
+    padding-inline: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .tournaments {
+    font-size: 0.82rem;
+  }
+}
