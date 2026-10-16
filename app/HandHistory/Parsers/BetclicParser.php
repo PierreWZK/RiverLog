@@ -19,13 +19,14 @@ use Carbon\CarbonImmutable;
 final class BetclicParser implements HandHistoryParser
 {
     /** À incrémenter quand la lecture change : les mains pourront être relues depuis leur texte brut. */
-    public const VERSION = 1;
+    public const VERSION = 2;
 
     private const CARD = '[2-9TJQKA][cdhs]';
 
     private const STREETS = ['PRE-FLOP' => 'preflop', 'FLOP' => 'flop', 'TURN' => 'turn', 'RIVER' => 'river'];
 
     private const VERBS = [
+        'Posts Ante' => 'post_ante',
         'Posts SB' => 'post_sb',
         'Posts BB' => 'post_bb',
         'Folds' => 'fold',
@@ -34,6 +35,9 @@ final class BetclicParser implements HandHistoryParser
         'Bets' => 'bet',
         'Raises to' => 'raise',
     ];
+
+    /** Événements de table sans effet sur la main (connexion, absence). */
+    private const TABLE_EVENTS = ['Disconnected', 'Reconnected', 'Sits out', 'Sits in'];
 
     public function site(): string
     {
@@ -90,7 +94,8 @@ final class BetclicParser implements HandHistoryParser
         // ---------- Joueurs ----------
         $players = [];
         foreach ($sections['PLAYERS']['lines'] ?? [] as $line) {
-            if (! preg_match('/^Seat (\d+): (.+) \((\d+)\)(?: \[([^\]]*)\])?$/u', $line, $m)) {
+            // Tournois KO : « Seat 1: Pseudo (1017, €5.00 bounty) [SB] » (la prime n'est pas conservée)
+            if (! preg_match('/^Seat (\d+): (.+) \((\d+)(?:, [^()]*bounty)?\)(?: \[([^\]]*)\])?$/u', $line, $m)) {
                 throw new ParseException("Ligne de joueur illisible : « {$line} »");
             }
             $tags = preg_split('/\s+/', trim($m[4] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
@@ -135,6 +140,7 @@ final class BetclicParser implements HandHistoryParser
         $board = null;
         $previousAt = null;
         $verbs = implode('|', array_map(fn ($verb) => preg_quote($verb, '/'), array_keys(self::VERBS)));
+        $events = implode('|', array_map(fn ($event) => preg_quote($event, '/'), self::TABLE_EVENTS));
 
         foreach (self::STREETS as $sectionName => $street) {
             if (! isset($sections[$sectionName])) {
@@ -150,6 +156,9 @@ final class BetclicParser implements HandHistoryParser
             $committed = []; // jetons misés par joueur sur cette street
 
             foreach ($sections[$sectionName]['lines'] as $line) {
+                if (preg_match('/^\d{2}:\d{2}:\d{2} - .+: (?:'.$events.')$/u', $line)) {
+                    continue;
+                }
                 if (! preg_match('/^(\d{2}:\d{2}:\d{2}) - (.+?): ('.$verbs.')(?: (\d+))?( and is all-in)?$/u', $line, $m)) {
                     throw new ParseException("Action illisible : « {$line} »");
                 }
@@ -159,7 +168,7 @@ final class BetclicParser implements HandHistoryParser
                 $amount = isset($m[4]) && $m[4] !== '' ? (int) $m[4] : null;
                 $player = &$this->requirePlayer($players, $name);
 
-                if (in_array($type, ['post_sb', 'post_bb', 'call', 'bet', 'raise'], true) && $amount === null) {
+                if (in_array($type, ['post_ante', 'post_sb', 'post_bb', 'call', 'bet', 'raise'], true) && $amount === null) {
                     throw new ParseException("Montant manquant : « {$line} »");
                 }
 
@@ -173,7 +182,10 @@ final class BetclicParser implements HandHistoryParser
                     throw new ParseException("Relance inférieure à la mise déjà engagée : « {$line} »");
                 }
 
-                $committed[$name] = $already + $added;
+                // L'ante est une mise morte : elle ne compte pas dans le total de la street (« Raises to »)
+                if ($type !== 'post_ante') {
+                    $committed[$name] = $already + $added;
+                }
                 $player['invested'] += $added;
                 if ($player['invested'] > $player['stack']) {
                     throw new ParseException("{$name} mise plus que son tapis ({$player['invested']} > {$player['stack']}).");
@@ -189,7 +201,7 @@ final class BetclicParser implements HandHistoryParser
                     type: $type,
                     amount: $amount,
                     added: $added,
-                    streetTotal: $committed[$name],
+                    streetTotal: $committed[$name] ?? 0,
                     isAllIn: ($m[5] ?? '') !== '',
                     actedAt: $actedAt,
                     // Les blindes sont automatiques : pas de temps de décision
@@ -225,12 +237,14 @@ final class BetclicParser implements HandHistoryParser
                 $player['finish_position'] = (int) $m[2];
                 $player['prize'] = isset($m[3]) ? $this->money($m[3]) : null;
                 unset($player);
+            } elseif (preg_match('/^.+ wins \S+ for eliminating /u', $line)) {
+                // Prime KO en euros (« X wins €1.70 for eliminating Y… ») : sans effet sur les jetons
             } else {
                 throw new ParseException("Ligne de résumé inconnue : « {$line} »");
             }
         }
 
-        $this->returnUncalledExcess($players);
+        $this->returnUncalledExcess($players, $totalPot);
         $this->checkPot($players, $totalPot);
 
         return new ParsedHand(
@@ -382,16 +396,18 @@ final class BetclicParser implements HandHistoryParser
     }
 
     /**
-     * Mise non suivie : quand un tapis est payé par un joueur plus court, l'excédent est rendu
-     * et Betclic ne le compte pas dans le pot. Quand tout le monde se couche, Betclic laisse
-     * la mise dans le pot (le gagnant la récupère avec « wins main pot »).
+     * Mise non suivie : Betclic n'est pas constant. Parfois l'excédent est rendu et absent du
+     * « Total Pot » (tapis payé par un plus court en heads-up), parfois il reste dans le pot et
+     * revient au miseur sous forme de « side pot » (à trois, ou quand tout le monde se couche).
+     * Le pot annoncé fait donc foi : on ne rend que l'écart constaté, dans la limite de ce que
+     * le plus gros contributeur a misé au-delà du deuxième.
      *
      * @param  array<string, array<string, mixed>>  $players
      */
-    private function returnUncalledExcess(array &$players): void
+    private function returnUncalledExcess(array &$players, int $totalPot): void
     {
-        $stillIn = array_filter($players, fn ($p) => ! $p['folded']);
-        if (count($stillIn) < 2) {
+        $gap = array_sum(array_column($players, 'invested')) - $totalPot;
+        if ($gap <= 0) {
             return;
         }
 
@@ -400,10 +416,9 @@ final class BetclicParser implements HandHistoryParser
         $names = array_keys($byInvested);
         $amounts = array_values($byInvested);
 
-        // Le plus gros contributeur ne peut pas engager plus que le deuxième (couché ou non)
-        $excess = $amounts[0] - ($amounts[1] ?? 0);
-        if ($excess > 0) {
-            $players[$names[0]]['invested'] -= $excess;
+        $uncalled = $amounts[0] - ($amounts[1] ?? 0);
+        if ($gap <= $uncalled) {
+            $players[$names[0]]['invested'] -= $gap;
         }
     }
 

@@ -190,4 +190,55 @@ class BetclicParserTest extends TestCase
 
         $this->assertSame('Joueur « Hero » introuvable dans la main.', $result->errors[0]['message']);
     }
+
+    /**
+     * Cas relevés sur un export d'octobre 2026 : tournoi KO avec antes, déconnexions, mises
+     * non suivies laissées dans le pot à trois joueurs.
+     *
+     * @return array<string, ParsedHand>
+     */
+    private function specialHands(): array
+    {
+        $result = (new BetclicParser)->parse(file_get_contents(base_path('tests/Fixtures/betclic/cas-particuliers.txt')));
+        $this->assertSame([], $result->errors);
+
+        $hands = [];
+        foreach ($result->hands as $hand) {
+            $hands[$hand->handId] = $hand;
+        }
+
+        return $hands;
+    }
+
+    public function test_tournoi_ko_avec_antes_et_deconnexion(): void
+    {
+        $hand = $this->specialHands()['01M45XJWPCGV671A5ZX30XRV3B'];
+        $players = array_column($hand->players, null, 'name');
+
+        $this->assertSame('Tournament', $hand->gameMode);
+        $this->assertSame([856, 856, 18], [$players['Chasseur']->invested, $players['Requin']->invested, $players['PierreWZK']->invested]);
+        $this->assertSame(1730, $players['Requin']->won);
+        $this->assertSame(73, $players['Chasseur']->finishPosition);
+
+        // Les antes sont des mises mortes : la relance « to 60 » ne les inclut pas
+        $preflop = array_values(array_filter($hand->actions, fn ($a) => $a->street === 'preflop'));
+        $this->assertSame(['post_ante', 3, 0], [$preflop[0]->type, $preflop[0]->added, $preflop[0]->streetTotal]);
+        $this->assertSame([15, 30, 60], [$preflop[3]->streetTotal, $preflop[4]->streetTotal, $preflop[5]->added]);
+
+        // « Disconnected » / « Reconnected » ne sont pas des actions
+        $this->assertCount(4, array_filter($hand->actions, fn ($a) => $a->street === 'flop'));
+    }
+
+    public function test_mise_non_suivie_laissee_dans_le_pot_a_trois(): void
+    {
+        $hands = $this->specialHands();
+
+        // Tapis de 1090 non suivi : Betclic le garde dans le pot (1180) et le rend en « side pot »
+        $hero = $hands['01M470GHM3TPWR4T0ZDRE9Z6Q6']->hero();
+        $this->assertSame([1090, 1150, 60], [$hero->invested, $hero->won, $hero->net()]);
+
+        // Mise de 120 au turn sans suite, adversaire déjà à tapis : idem
+        $hero = $hands['01M46VV8Y2T2FMYZH7DJT7Y21D']->hero();
+        $this->assertSame([225, 210, -15], [$hero->invested, $hero->won, $hero->net()]);
+    }
 }

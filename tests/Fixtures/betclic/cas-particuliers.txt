@@ -1,0 +1,131 @@
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Tournament
+Game Type: NL Texas Hold'em
+Tournament Type: SKO
+Game Name: TRIAD - SMASH KO
+Game ID: 01M44NRD00A0KXSBB5T335VZBQ
+Buy In: 10.00€
+Hand ID: 01M45XJWPCGV671A5ZX30XRV3B
+Date & Time: 2026-10-05 11:36:02 (UTC)
+Table ID: 01M45WYD1EHEANKTEAY99TXZX0
+Ante: 3
+Blinds: 15/30
+Total Pot: 1730
+Rake: 0
+*** PLAYERS ***
+Seat 1: Chasseur (856, €8.50 bounty) [BB]
+Seat 2: Requin (1568, €7.00 bounty) [BTN]
+Seat 3: PierreWZK (1055, €5.00 bounty) [SB Hero]
+*** HOLE CARDS ***
+Chasseur: [Qh Kc]
+Requin: [Ac As]
+PierreWZK: [3c Ts]
+*** PRE-FLOP ***
+11:36:02 - Chasseur: Posts Ante 3
+11:36:02 - Requin: Posts Ante 3
+11:36:02 - PierreWZK: Posts Ante 3
+11:36:02 - PierreWZK: Posts SB 15
+11:36:02 - Chasseur: Posts BB 30
+11:36:04 - Requin: Raises to 60
+11:36:05 - PierreWZK: Folds
+11:36:10 - Chasseur: Calls 30
+*** FLOP *** [Qs 3h 9h]
+11:36:15 - Chasseur: Checks
+11:36:19 - Requin: Bets 75
+11:36:24 - Chasseur: Disconnected
+11:36:29 - Chasseur: Reconnected
+11:36:31 - Chasseur: Raises to 793 and is all-in
+11:36:33 - Requin: Calls 718
+*** TURN *** [Qs 3h 9h Tc]
+*** RIVER *** [Qs 3h 9h Tc Ah]
+*** SHOWDOWN ***
+Chasseur shows [Qh Kc] (Pair) [Qs Qh Ah Kc Tc]
+Requin shows [Ac As] (Three of a Kind) [As Ah Ac Qs Tc]
+*** SUMMARY ***
+Requin wins main pot of 1730
+Chasseur finished 73th
+Requin wins €1.70 for eliminating Chasseur (x0.4), Requin own bounty increases from €7.00 to €8.70
+------------
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 5€
+Game ID: 01M4707K6HEWVJPGDVEXJ5WRRX
+Prize pool: 10.00€
+Multiplier: x2
+Buy In: 5.00€
+Hand ID: 01M470GHM3TPWR4T0ZDRE9Z6Q6
+Date & Time: 2026-10-05 21:46:25 (UTC)
+Table ID: 01M4707K6W0KD7SHNFRCBPFDVM
+Blinds: 40/80
+Total Pot: 1180
+Rake: 0
+*** PLAYERS ***
+Seat 1: PierreWZK (1090) [SB Hero]
+Seat 2: Prudent (400) [BB]
+Seat 3: Microstack (10) [BTN]
+*** HOLE CARDS ***
+PierreWZK: [Td 9s]
+Microstack: [Ac Kh]
+*** PRE-FLOP ***
+21:46:25 - PierreWZK: Posts SB 40
+21:46:25 - Prudent: Posts BB 80
+21:46:27 - Microstack: Calls 10 and is all-in
+21:46:34 - PierreWZK: Raises to 1090 and is all-in
+21:46:35 - Prudent: Folds
+*** FLOP *** [6s 8d Kd]
+*** TURN *** [6s 8d Kd 3c]
+*** RIVER *** [6s 8d Kd 3c As]
+*** SHOWDOWN ***
+PierreWZK shows [Td 9s] (High Card) [As Kd Td 9s 8d]
+Microstack shows [Ac Kh] (Two Pair) [As Ac Kh Kd 8d]
+*** SUMMARY ***
+Microstack wins main pot of 30
+PierreWZK wins 1st side pot of 1150
+------------
+*** HEADER ***
+Site: Betclic.fr
+Game Mode: Spin
+Game Type: NL Texas Hold'em
+Game Name: Spin & Rush 5€
+Game ID: 01M46VREHJ6FQXBDVGJZPJT1Y5
+Prize pool: 10.00€
+Multiplier: x2
+Buy In: 5.00€
+Hand ID: 01M46VV8Y2T2FMYZH7DJT7Y21D
+Date & Time: 2026-10-05 20:24:54 (UTC)
+Table ID: 01M46VREHWWRNT3EE8PPJ84V5Z
+Blinds: 15/30
+Total Pot: 390
+Rake: 0
+*** PLAYERS ***
+Seat 1: Courte (60) [SB]
+Seat 2: Suiveur (460) [BB]
+Seat 3: PierreWZK (980) [BTN Hero]
+*** HOLE CARDS ***
+Courte: [5d 9d]
+PierreWZK: [Qc Qd]
+*** PRE-FLOP ***
+20:24:54 - Courte: Posts SB 15
+20:24:54 - Suiveur: Posts BB 30
+20:24:56 - PierreWZK: Raises to 60
+20:24:59 - Courte: Calls 45 and is all-in
+20:24:59 - Suiveur: Calls 30
+*** FLOP *** [Ts 2h 4h]
+20:25:02 - Suiveur: Checks
+20:25:04 - PierreWZK: Bets 45
+20:25:05 - Suiveur: Calls 45
+*** TURN *** [Ts 2h 4h 5h]
+20:25:07 - Suiveur: Checks
+20:25:15 - PierreWZK: Bets 120
+20:25:16 - Suiveur: Folds
+*** RIVER *** [Ts 2h 4h 5h 5s]
+*** SHOWDOWN ***
+PierreWZK shows [Qc Qd] (Two Pair) [Qd Qc 5s 5h Ts]
+Courte shows [5d 9d] (Three of a Kind) [5s 5h 5d Ts 9d]
+*** SUMMARY ***
+Courte wins main pot of 180
+PierreWZK wins 1st side pot of 210
+------------
