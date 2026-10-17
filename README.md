@@ -1,6 +1,6 @@
 # RiverLog · Suivi de bankroll poker
 
-> Jour 03 du défi **30 jours, 30 projets** · Laravel, Blade, MySQL et Chart.js · 🟢 **En ligne : [riverlog.alwaysdata.net](https://riverlog.alwaysdata.net)**
+> Jour 03 du défi **30 jours, 30 projets** · Laravel, Blade, MySQL et Chart.js · 🟢 **En ligne : [riverlog.projectp.fr](https://riverlog.projectp.fr)**
 
 ![Page vitrine de RiverLog](docs/preview.png)
 
@@ -54,7 +54,7 @@ Puis ouvrir http://127.0.0.1:8000 (la démo publique est sur `/demo`).
 
 ## Mise en ligne
 
-RiverLog est hébergé sur **[Alwaysdata](https://www.alwaysdata.com)** : **https://riverlog.alwaysdata.net**.
+RiverLog est hébergé sur **[Alwaysdata](https://www.alwaysdata.com)** : **https://riverlog.projectp.fr**.
 
 ```
  push sur master ──► GitHub Actions ──► tests (PHP 8.3 + MySQL 8.4)

@@ -26,7 +26,6 @@
         </a>
         <nav class="nav-actions">
             <a href="{{ route('challenges.index') }}" class="nav-link">Défis du jour</a>
-            <a href="{{ $repo }}" class="nav-link nav-github" target="_blank" rel="noopener">GitHub ↗</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="nav-link">Mon dashboard</a>
             @else

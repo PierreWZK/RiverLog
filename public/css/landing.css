@@ -502,12 +502,6 @@ a {
   gap: 8px;
 }
 
-@media (max-width: 480px) {
-  .nav-github {
-    display: none;
-  }
-}
-
 /* Cartes cliquables (défis du jour) */
 .feature-link {
   text-decoration: none;
