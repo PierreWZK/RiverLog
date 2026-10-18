@@ -244,8 +244,8 @@
     </main>
 
     <footer class="footer container">
-        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets · <a href="{{ $repo }}" target="_blank" rel="noopener">Code sur GitHub</a></span>
-        <span>Laravel · Blade · MySQL · Chart.js</span>
+        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets</span>
+        <span>Fait avec Laravel · <a href="{{ $repo }}" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
     </footer>
 </body>
 </html>
