@@ -61,6 +61,7 @@
         <span>Fait avec Laravel · <a href="https://github.com/PierreWZK/RiverLog" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
     </footer>
 
+    <script src="{{ asset('js/password-toggle.js') }}"></script>
     @stack('scripts')
 </body>
 </html>
