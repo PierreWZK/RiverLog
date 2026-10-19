@@ -26,10 +26,4 @@ final readonly class ParsedAction
         public CarbonImmutable $actedAt,
         public ?int $decisionSeconds,   // temps écoulé depuis l'action précédente de la main
     ) {}
-
-    /** Mise volontaire (les blindes ne comptent pas). */
-    public function isVoluntary(): bool
-    {
-        return in_array($this->type, ['call', 'bet', 'raise'], true);
-    }
 }

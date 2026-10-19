@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title') · RiverLog</title>
+    @include('partials.meta', ['title' => trim($__env->yieldContent('title')).' · RiverLog'])
     <link rel="icon" href="{{ asset('riverlog.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

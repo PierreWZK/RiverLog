@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RiverLog · Suivi de bankroll poker</title>
-    <meta name="description" content="RiverLog suit votre bankroll poker : sessions, profit net, taux horaire, import des historiques Betclic, ROI et statistiques de tournois.">
+    @include('partials.meta', ['title' => 'RiverLog · Suivi de bankroll poker'])
     <link rel="icon" href="{{ asset('riverlog.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
