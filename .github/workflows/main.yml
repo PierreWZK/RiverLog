@@ -1,18 +1,10 @@
 # ---------------------------------------------------------------------------
-# RiverLog · intégration et déploiement continus
+# RiverLog · intégration continue
 #
-# CI : à chaque push et pull request, les tests tournent sur PHP 8.3 + MySQL 8.4.
-# CD : sur master uniquement, et seulement si les tests passent, le site
-#      Alwaysdata est mis à jour en SSH (script deploy.sh).
-#
-# Réglages du dépôt (Settings → Secrets and variables → Actions) :
-#   secrets   SSH_PRIVATE_KEY   clé privée dédiée au déploiement
-#             SSH_KNOWN_HOSTS   empreinte du serveur SSH (évite une attaque de l'intermédiaire)
-#   variables DEPLOY_HOST       ssh-riverlog.alwaysdata.net
-#             DEPLOY_USER       riverlog
-#             DEPLOY_PATH       dossier du projet sur le serveur
+# À chaque push et pull request, les tests tournent sur PHP 8.3 + MySQL 8.4.
+# Le déploiement est fait par Coolify à chaque push sur master.
 # ---------------------------------------------------------------------------
-name: CI / CD
+name: CI
 
 on:
   push:
@@ -74,44 +66,3 @@ jobs:
       - name: Tests
         run: php artisan test
 
-  deploy:
-    name: Déploiement sur Alwaysdata
-    needs: tests
-    # Uniquement master (push ou bouton manuel), jamais pour une pull request
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://riverlog.alwaysdata.net
-    # Un seul déploiement à la fois ; un nouveau push attend la fin du précédent
-    concurrency:
-      group: production
-      cancel-in-progress: false
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Clé SSH
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-
-      - name: Mise à jour du site
-        env:
-          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
-            "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -s" < deploy.sh
-
-      - name: Vérification du site
-        run: |
-          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 https://riverlog.alwaysdata.net/)
-          echo "Page d'accueil : HTTP $code"
-          test "$code" = "200"
