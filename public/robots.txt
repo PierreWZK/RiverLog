@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /sessions
+Disallow: /imports
+Disallow: /tournaments
+Disallow: /login
+
+Sitemap: https://riverlog.projectp.fr/sitemap.xml

@@ -12,6 +12,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RiverLog · Suivi de bankroll poker</title>
     @include('partials.meta', ['title' => 'RiverLog · Suivi de bankroll poker'])
+    <script type="application/ld+json">
+    {
+      "@@context": "https://schema.org",
+      "@@type": "WebApplication",
+      "name": "RiverLog",
+      "url": "https://riverlog.projectp.fr/",
+      "description": "Suivi de bankroll poker : sessions, profit net, taux horaire, import des historiques Betclic, ROI et statistiques de tournois.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "inLanguage": "fr",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "image": "https://riverlog.projectp.fr/og.png",
+      "author": {
+        "@@type": "Person",
+        "name": "PierreWZK",
+        "url": "https://github.com/PierreWZK"
+      },
+      "isPartOf": {
+        "@@type": "WebSite",
+        "name": "ProjectP",
+        "url": "https://projectp.fr/"
+      }
+    }
+    </script>
     <link rel="icon" href="{{ asset('riverlog.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -244,7 +273,7 @@
     </main>
 
     <footer class="footer container">
-        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets</span>
+        <span>RiverLog · Jour 03 du défi <a href="https://projectp.fr/">30 jours, 30 projets</a></span>
         <span>Fait avec Laravel · <a href="{{ $repo }}" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
     </footer>
 </body>

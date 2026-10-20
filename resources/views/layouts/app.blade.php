@@ -58,7 +58,7 @@
     </main>
 
     <footer class="footer container">
-        <span>RiverLog · Jour 03 du défi 30 jours, 30 projets</span>
+        <span>RiverLog · Jour 03 du défi <a href="https://projectp.fr/">30 jours, 30 projets</a></span>
         <span>Fait avec Laravel · <a href="https://github.com/PierreWZK/RiverLog" target="_blank" rel="noopener">Code sur GitHub ↗</a></span>
     </footer>
 

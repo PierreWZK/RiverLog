@@ -8,6 +8,7 @@
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
 <meta property="og:url" content="{{ url()->current() }}">
+<link rel="canonical" href="{{ url()->current() }}">
 <meta property="og:image" content="{{ asset('og.png') }}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
