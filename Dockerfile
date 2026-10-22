@@ -2,12 +2,12 @@
 # ---------------------------------------------------------------------------
 # RiverLog en production : FrankenPHP (Caddy + PHP 8.3) derrière le proxy de Coolify.
 #
-# L'étiquette « 1-php8.3 » suit les correctifs de PHP 8.3 : reconstruire l'image sans cache
-# suffit pour récupérer une version corrigée (ex. PHP2Shell, corrigé en 8.3.36).
+# Version exacte de PHP : elle garantit que l'image corrigée est bien utilisée (PHP2Shell, corrigé en 8.3.36).
+# À chaque correctif de sécurité de PHP 8.3, monter ce numéro.
 # Après chaque déploiement, Coolify lance : php artisan migrate --force && php artisan optimize
 # Les réglages viennent des variables d'environnement de Coolify (voir README, « Mise en ligne »).
 # ---------------------------------------------------------------------------
-FROM dunglas/frankenphp:1-php8.3
+FROM dunglas/frankenphp:1-php8.3.36
 
 WORKDIR /app
 

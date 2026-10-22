@@ -59,7 +59,7 @@ RiverLog est hébergé sur un VPS avec **[Coolify](https://coolify.io)** : **htt
 | Élément | Réglage dans Coolify |
 | --- | --- |
 | **Application** | Dépôt GitHub `PierreWZK/RiverLog`, build pack **Dockerfile**, port 80 |
-| **Image** | [`Dockerfile`](Dockerfile) : FrankenPHP (Caddy + PHP 8.3). L'étiquette `1-php8.3` suit les correctifs de PHP : un redéploiement **sans cache** récupère la dernière version corrigée |
+| **Image** | [`Dockerfile`](Dockerfile) : FrankenPHP (Caddy + PHP 8.3). Version exacte de PHP (`1-php8.3.36`), à monter à chaque correctif de sécurité |
 | **Serveur web** | [`docker/Caddyfile`](docker/Caddyfile) et [`docker/php.ini`](docker/php.ini) : limite d'envoi de 16 Mo pour les imports, fichiers cachés jamais servis, version de PHP masquée |
 | **Après chaque déploiement** | `php artisan migrate --force && php artisan optimize` |
 | **Base de données** | MySQL dans Coolify (`riverlog_database`), reliée par la variable `DB_URL` |
