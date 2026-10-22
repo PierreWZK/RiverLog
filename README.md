@@ -58,8 +58,9 @@ RiverLog est hébergé sur un VPS avec **[Coolify](https://coolify.io)** : **htt
 
 | Élément | Réglage dans Coolify |
 | --- | --- |
-| **Application** | Dépôt GitHub `PierreWZK/RiverLog`, build pack **Nixpacks** (PHP + Node), commande de build `npm run build`, port 80 |
-| **nginx** | [`nginx.template.conf`](nginx.template.conf) : modèle lu par Nixpacks, avec une limite d'envoi de 16 Mo pour les imports |
+| **Application** | Dépôt GitHub `PierreWZK/RiverLog`, build pack **Dockerfile**, port 80 |
+| **Image** | [`Dockerfile`](Dockerfile) : FrankenPHP (Caddy + PHP 8.3). Version exacte de PHP (`1-php8.3.36`), à monter à chaque correctif de sécurité |
+| **Serveur web** | [`docker/Caddyfile`](docker/Caddyfile) et [`docker/php.ini`](docker/php.ini) : limite d'envoi de 16 Mo pour les imports, fichiers cachés jamais servis, version de PHP masquée |
 | **Après chaque déploiement** | `php artisan migrate --force && php artisan optimize` |
 | **Base de données** | MySQL dans Coolify (`riverlog_database`), reliée par la variable `DB_URL` |
 | **Variables** | `APP_KEY`, `APP_URL`, `APP_ENV=production`, `APP_DEBUG=false` (indispensable : sinon une erreur afficherait les mots de passe), `SESSION_SECURE_COOKIE=true`… ; jamais versionnées |
@@ -73,4 +74,4 @@ Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) lance les
 
 ## Technologies
 
-Laravel 13, Blade, MySQL 8.4, Chart.js. Hébergement Coolify (Nixpacks), tests sur GitHub Actions. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).
+Laravel 13, Blade, MySQL 8.4, Chart.js. Hébergement Coolify (image Docker FrankenPHP), tests sur GitHub Actions. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).
