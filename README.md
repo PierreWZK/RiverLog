@@ -1,8 +1,14 @@
 # RiverLog · Suivi de bankroll poker
 
-> Jour 03 du défi **30 jours, 30 projets** · Laravel, Blade, MySQL et Chart.js · 🟢 **En ligne : [riverlog.projectp.fr](https://riverlog.projectp.fr)**
+🌐 **[riverlog.projectp.fr](https://riverlog.projectp.fr/)** · Jour 03 du défi **[30 jours, 30 projets](https://projectp.fr/)** · [Dépôt du défi](https://github.com/PierreWZK/30DaysProjects)
 
-![Page vitrine de RiverLog](docs/preview.png)
+Stack : Laravel, Blade, MySQL et Chart.js.
+
+[![Page vitrine de RiverLog](docs/preview-accueil.png)](https://riverlog.projectp.fr/)
+
+<p align="center">
+  <img src="docs/preview-mobile.png" alt="RiverLog sur téléphone" width="260">
+</p>
 
 RiverLog suit votre bankroll poker et analyse vos tournois : **profit net, taux horaire, ROI et évolution des résultats**, à partir de sessions saisies à la main ou d'historiques de mains importés.
 
@@ -75,3 +81,14 @@ Le workflow [`.github/workflows/main.yml`](.github/workflows/main.yml) lance les
 ## Technologies
 
 Laravel 13, Blade, MySQL 8.4, Chart.js. Hébergement Coolify (image Docker FrankenPHP), tests sur GitHub Actions. Polices Space Grotesk, Inter et JetBrains Mono (Google Fonts).
+
+---
+
+## Le défi 30 jours, 30 projets
+
+Un projet complet par jour pendant 30 jours, chacun en ligne sur son propre sous-domaine.
+
+- 🗂️ **Tous les projets** : [projectp.fr](https://projectp.fr/)
+- 💻 **Le dépôt du défi** : [github.com/PierreWZK/30DaysProjects](https://github.com/PierreWZK/30DaysProjects)
+- ⬅️ **Jour précédent** : [Écho, jeux de mémoire musicaux](https://echo.projectp.fr/)
+- ➡️ **Jour suivant** : [3logy, hub geek](https://3logy.projectp.fr/)
